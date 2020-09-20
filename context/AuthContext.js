@@ -47,9 +47,7 @@ const signup = (dispatch) => async ({ email, password }) => {
     const response = await firebase
       .auth()
       .createUserWithEmailAndPassword(email, password);
-    //   response.user.updateProfile({
-    //     displayName: displayName,
-    //   });
+
     dispatch({ type: "signin" });
     navigate("calendarFlow");
   } catch (err) {

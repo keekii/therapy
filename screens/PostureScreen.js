@@ -4,83 +4,91 @@ import {
   Text,
   View,
   Image,
-  TextInput,
-  Button,
-  Alert,
-  ActivityIndicator,
   TouchableOpacity,
   FlatList,
 } from "react-native";
-import { List } from "react-native-paper";
-import { NavigationEvents } from "react-navigation";
-import Theme, { fontFamily } from "../constants/Theme";
+
+import { fontFamily } from "../constants/Theme";
 import { Context as CalendarContext } from "../context/CalendarContext";
 
 const PostureScreen = ({ navigation }) => {
-  const { state, getPosture } = useContext(CalendarContext);
-  const [posture, setPosture] = useState([]);
+  const { state, getPosture, setSelected } = useContext(CalendarContext);
+  const [switchVal, setSwitchVal] = useState(false);
+
   useEffect(() => {
     getPosture();
   }, []);
 
-  const onClick = (item) => {
-    setPosture({ ...posture, item });
+  const buttPress = (item) => {
+    switchVal === false
+      ? setSelected(item)
+      : navigation.navigate("PostureDetail", { id: item });
   };
-
-  console.log(posture);
 
   return (
     <>
-      {/* <NavigationEvents onWillFocus={getPosture} /> */}
-      <View style={styles.container}>
-        <View style={styles.headerContainer}>
-          <Text style={styles.headerText}>Postures List</Text>
-          <Text style={styles.selectText}>Select</Text>
-        </View>
-        <FlatList
-          style={styles.list}
-          contentContainerStyle={styles.listContainer}
-          data={state.postures}
-          horizontal={false}
-          numColumns={2}
-          keyExtractor={(item) => {
-            return item.key;
-          }}
-          renderItem={({ item }) => {
-            return (
-              <TouchableOpacity
-                style={styles.card}
-                onPress={
-                  () => onClick(item)
-                  //navigation.navigate("PostureDetail", { id: item.key })
-                }
-              >
-                <View style={styles.cardFooter}></View>
-                <Image
-                  style={styles.cardImage}
-                  source={{ uri: item.thumbnail }}
-                />
-                <View style={styles.cardHeader}>
-                  <View
-                    style={{ alignItems: "center", justifyContent: "center" }}
-                  >
-                    <Text style={styles.title}>{item.name}</Text>
-                  </View>
-                </View>
+      {state.isLoading === false ? (
+        <View style={styles.container}>
+          <View style={styles.headerContainer}>
+            <Text style={styles.headerText}>Postures List</Text>
+
+            {switchVal === true ? (
+              <TouchableOpacity onPress={() => setSwitchVal(!switchVal)}>
+                <Text style={styles.selectText}>Mode : View</Text>
               </TouchableOpacity>
-            );
-          }}
-        />
-        <View style={styles.btnBox}>
-          <TouchableOpacity
-            style={styles.submitContainer}
-            title="Save"
-            onPress={() => navigation.navigate("CreateAppointment")}
-          >
-            <Text style={styles.submitText}>Save</Text>
-          </TouchableOpacity>
+            ) : (
+              <TouchableOpacity onPress={() => setSwitchVal(!switchVal)}>
+                <Text style={styles.selectText}>Mode : Select</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          <FlatList
+            style={styles.list}
+            contentContainerStyle={styles.listContainer}
+            data={state.postures}
+            horizontal={false}
+            numColumns={2}
+            keyExtractor={(item) => {
+              return item.key;
+            }}
+            renderItem={({ item }) => {
+              let style_card;
+              item.isSelected === false
+                ? (style_card = styles.card)
+                : (style_card = styles.card2);
+              return (
+                <TouchableOpacity
+                  style={style_card}
+                  onPress={() => buttPress(item.key)}
+                >
+                  <View style={styles.cardFooter}></View>
+                  <Image
+                    style={styles.cardImage}
+                    source={{ uri: item.thumbnail }}
+                  />
+                  <View style={styles.cardHeader}>
+                    <View
+                      style={{ alignItems: "center", justifyContent: "center" }}
+                    >
+                      <Text style={styles.title}>{item.name}</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              );
+            }}
+          />
+          <View style={styles.btnBox}>
+            <TouchableOpacity
+              style={styles.submitContainer}
+              title="Save"
+              onPress={() => navigation.pop()}
+            >
+              <Text style={styles.submitText}>Save</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      ) : null}
     </>
   );
 };
@@ -137,6 +145,24 @@ const styles = StyleSheet.create({
   card: {
     shadowColor: "#00000021",
     borderColor: "#DADADA",
+    borderWidth: 1,
+
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
+    shadowOpacity: 0.37,
+    shadowRadius: 7.49,
+
+    elevation: 12,
+    marginVertical: 10,
+    backgroundColor: "white",
+    flexBasis: "42%",
+    marginHorizontal: 10,
+  },
+  card2: {
+    shadowColor: "#00000021",
+    borderColor: "red",
     borderWidth: 1,
 
     shadowOffset: {

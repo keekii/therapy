@@ -4,8 +4,7 @@ import { FlatList, TouchableOpacity } from "react-native-gesture-handler";
 import { withNavigation } from "react-navigation";
 import Theme, { fontFamily } from "../constants/Theme";
 
-const PatientList = ({ navigation, result, value, onChange, onSubmit }) => {
-  //console.log(result);
+const PatientList = ({ result, value, onChange, onSubmit, selected }) => {
   return (
     <>
       <Text style={styles.title}>Patients</Text>
@@ -26,15 +25,26 @@ const PatientList = ({ navigation, result, value, onChange, onSubmit }) => {
           autoCorrect={false}
         />
       </View>
-      {result.map((item) => (
-        <TouchableOpacity key={item.key}>
-          <View style={styles.notificationBox}>
-            <Image style={styles.image} source={{ uri: item.profile_pic }} />
 
-            <Text style={styles.name}>{item.name}</Text>
-          </View>
-        </TouchableOpacity>
-      ))}
+      {result.map((item) =>
+        item.isSelected === true ? (
+          <TouchableOpacity key={item.key} onPress={() => selected(item.key)}>
+            <View style={styles.notificationBox2}>
+              <Image style={styles.image} source={{ uri: item.profile_pic }} />
+
+              <Text style={styles.name}>{item.name}</Text>
+            </View>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity key={item.key} onPress={() => selected(item.key)}>
+            <View style={styles.notificationBox}>
+              <Image style={styles.image} source={{ uri: item.profile_pic }} />
+
+              <Text style={styles.name}>{item.name}</Text>
+            </View>
+          </TouchableOpacity>
+        )
+      )}
     </>
   );
 };
@@ -92,6 +102,25 @@ const styles = StyleSheet.create({
     height: 60,
     borderBottomWidth: 1,
     borderBottomColor: Theme.COLORS.PRIMARY,
+  },
+
+  notificationBox2: {
+    paddingVertical: 10,
+
+    backgroundColor: Theme.COLORS.LIST_BG,
+    flexDirection: "row",
+    height: 60,
+    borderBottomWidth: 1,
+    borderBottomColor: "red",
+  },
+  notificationBoxSelected: {
+    paddingVertical: 10,
+
+    backgroundColor: Theme.COLORS.LIST_BG,
+    flexDirection: "row",
+    height: 60,
+    borderBottomWidth: 1,
+    borderBottomColor: "red",
   },
   image: {
     width: 40,

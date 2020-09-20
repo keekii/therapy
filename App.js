@@ -33,7 +33,7 @@ const switchNavigator = createSwitchNavigator({
   mainFlow: createBottomTabNavigator({
     calendarFlow: createStackNavigator({
       Calendar: CalendarScreen,
-      AppointmentsDetail: AppointmentDetailScreen,
+      AppointmentDetail: AppointmentDetailScreen,
       CreateAppointment: CreateAppointmentScreen,
       EditAppointment: EditAppointmentScreen,
       Posture: PostureScreen,
@@ -56,6 +56,12 @@ SigninScreen.navigationOptions = () => {
   };
 };
 
+CalendarScreen.navigationOptions = () => {
+  return {
+    header: () => false,
+  };
+};
+
 ProfileScreen.navigationOptions = () => {
   return {
     header: () => false,
@@ -68,13 +74,51 @@ EditProfileScreen.navigationOptions = () => {
   };
 };
 
-CalendarScreen.navigationOptions = () => {
+PatientScreen.navigationOptions = () => {
+  return {
+    header: () => false,
+  };
+};
+
+PatientDetailScreen.navigationOptions = () => {
+  return {
+    header: () => false,
+  };
+};
+
+ProfileScreen.navigationOptions = () => {
   return {
     header: () => false,
   };
 };
 
 CreateAppointmentScreen.navigationOptions = () => {
+  return {
+    title: null,
+    headerLeft: () => {
+      <Text>Hi</Text>;
+    },
+    headerStyle: {
+      backgroundColor: "#00CAD3",
+      shadowColor: "transparent",
+    },
+  };
+};
+
+AppointmentDetailScreen.navigationOptions = () => {
+  return {
+    title: null,
+    headerLeft: () => {
+      <Text>Hi</Text>;
+    },
+    headerStyle: {
+      backgroundColor: "#00CAD3",
+      shadowColor: "transparent",
+    },
+  };
+};
+
+EditAppointmentScreen.navigationOptions = () => {
   return {
     title: null,
     headerLeft: () => {

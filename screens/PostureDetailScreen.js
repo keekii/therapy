@@ -10,7 +10,6 @@ const PostureDetailScreen = ({ navigation }) => {
   const postures = state.postures.find(
     (posture) => posture.key === navigation.getParam("id")
   );
-  console.log(postures);
   return (
     <ScrollView style={styles.container}>
       <View style={{ marginTop: 10 }}>

@@ -9,8 +9,9 @@ const CalendarScreen = ({ navigation }) => {
   const today = moment().format("YYYY-MM-DD");
   const { getItems, state } = useContext(CalendarContext);
   const [data, setData] = useState({});
+  const { appointments } = state;
 
-  //console.log(state);
+  // console.log(appointments);
 
   const rowHasChanged = (r1, r2) => {
     return r1.name !== r2.name;
@@ -22,7 +23,8 @@ const CalendarScreen = ({ navigation }) => {
   };
 
   const loadItems = (day) => {
-    items = {};
+    items = appointments;
+
     setTimeout(() => {
       if (state.appointments) {
         for (let i = -15; i < 85; i++) {
@@ -47,7 +49,11 @@ const CalendarScreen = ({ navigation }) => {
     return (
       <TouchableOpacity
         style={[styles.item]}
-        onPress={() => navigation.navigate("CreateAppointment")}
+        onPress={() =>
+          navigation.navigate("AppointmentDetail", {
+            key: item.key,
+          })
+        }
       >
         <Text>{item.name}</Text>
         <Text>{item.date}</Text>

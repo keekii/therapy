@@ -4,40 +4,50 @@ import { withNavigation } from "react-navigation";
 import { fontFamily } from "../constants/Theme";
 import { List } from "react-native-paper";
 
-const PostureList = ({ navigation, value, onClickk, add }) => {
-  const [collapse, setCollapse] = useState(false);
-  const [data, setData] = useState([]);
+const PostureList = ({
+  navigation,
+  value,
+  onRemove,
+  removeEnabled,
+  textEnabled,
+}) => {
+  const [collapse, setCollapse] = useState(true);
 
-  const onClick = () => {
+  const changeCollapse = () => {
     setCollapse(!collapse);
   };
 
   return (
     <>
-      <TouchableOpacity onPress={add}>
-        <Text style={styles.link}>Add therapy posture</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate("Posture")}>
-        <Text style={styles.link}>Posture List</Text>
-      </TouchableOpacity>
+      {textEnabled === true ? (
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Posture", { selected: value })}
+        >
+          <Text style={styles.link}>Posture List</Text>
+        </TouchableOpacity>
+      ) : (
+        <Text style={styles.title}>Posture List</Text>
+      )}
+
       <List.Section>
         <List.Accordion
           title="Selected postures"
           style={{ backgroundColor: "#F0EDED" }}
           expanded={collapse}
-          onPress={onClick}
+          onPress={changeCollapse}
         >
           {value.map((item) => (
             <View key={item.key} style={styles.postureContainer}>
-              <List.Item title={item.posture_name} />
-              {/* {console.log(item.posture_id)} */}
+              <List.Item title={item.name} />
               <View style={styles.itemContainer}>
                 <Image
                   style={[styles.thumbnail, styles.inputIcon]}
                   source={require("../assets/thumbnail.jpg")}
                 />
-                <TouchableOpacity onPress={() => onClickk(item.posture_id)}>
-                  <Text style={styles.removeText}>Remove</Text>
+                <TouchableOpacity onPress={() => onRemove(item.key)}>
+                  {removeEnabled === true ? (
+                    <Text style={styles.removeText}>Remove</Text>
+                  ) : null}
                 </TouchableOpacity>
               </View>
             </View>
@@ -50,8 +60,9 @@ const PostureList = ({ navigation, value, onClickk, add }) => {
 
 const styles = StyleSheet.create({
   link: {
-    marginVertical: 24,
-    fontSize: 14,
+    marginTop: 24,
+    marginBottom: 10,
+    fontSize: 16,
     fontWeight: "600",
     fontFamily,
     textDecorationLine: "underline",
@@ -82,6 +93,14 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
     textDecorationColor: "#555555",
     color: "#555555",
+  },
+  title: {
+    color: "#1D2029",
+    fontSize: 16,
+    fontWeight: "600",
+    fontFamily,
+    marginTop: 24,
+    marginBottom: 10,
   },
 });
 

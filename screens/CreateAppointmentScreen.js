@@ -15,80 +15,94 @@ import { fontFamily } from "../constants/Theme";
 import { Context as CalendarContext } from "../context/CalendarContext";
 
 const CreateAppointmentScreen = ({ navigation }) => {
-  const { addPosture, removePosture, getPatientList, state } = useContext(
-    CalendarContext
-  );
+  const {
+    removePosture,
+    getPatientList,
+    state,
+    setSelectedPatient,
+    storeAppointment,
+  } = useContext(CalendarContext);
 
+  const [topic, setTopic] = useState("");
+  const [date, setDate] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
   const [input, setInput] = useState("");
 
+  const { patients, selectedPatient, selected } = state;
+
   useEffect(() => {
-    getPatientList(input);
+    getPatientList(input, 5);
   }, []);
 
-  const add = () => {
-    addPosture([
-      {
-        key: "1",
-        posture_id: "1",
-        thumbnail: "../assets/thumbnail.jpg",
-        posture_name: "Posture 1",
-      },
-      {
-        key: "2",
-        posture_id: "2",
-        thumbnail: "../assets/thumbnail.jpg",
-        posture_name: "Posture 2",
-      },
-      {
-        key: "3",
-        posture_id: "3",
-        thumbnail: "../assets/thumbnail.jpg",
-        posture_name: "Posture 3",
-      },
-    ]);
-  };
-
-  const newItem = (id) =>
-    state.postures.filter((item) => item.posture_id !== id);
-  console.log("Result ", newItem("2"));
+  const data = [
+    {
+      isSelected: true,
+      key: "user-key",
+      name: "Tasanai",
+      profile_pic: undefined,
+    },
+  ];
 
   return (
     <>
       <View style={styles.topBox}>
-        <Text style={styles.topLabel}>Create new appointments</Text>
+        <Text style={styles.topLabel}>CREATE NEW APPOINTMENTS</Text>
         <Text style={styles.topTitle}>Topic</Text>
-        <TextInput style={styles.topInput}></TextInput>
+        <TextInput
+          style={styles.topInput}
+          value={topic}
+          onChangeText={setTopic}
+        ></TextInput>
         <View style={styles.topBorder}></View>
       </View>
 
       <ScrollView style={styles.container}>
         <View style={styles.midBox}>
-          <InputTextField label="DATE" />
+          <InputTextField label="DATE" data={date} onChange={setDate} />
           <View style={styles.timeBox}>
             <View style={{ width: "50%", paddingRight: 20 }}>
-              <InputTextField label="START TIME" />
+              <InputTextField
+                label="START TIME"
+                data={startTime}
+                onChange={setStartTime}
+              />
             </View>
             <View style={{ width: "50%" }}>
-              <InputTextField label="END TIME" />
+              <InputTextField
+                label="END TIME"
+                data={endTime}
+                onChange={setEndTime}
+              />
             </View>
           </View>
           <PatientList
-            result={state.patients}
+            result={patients}
             value={input}
             onChange={setInput}
-            onSubmit={() => getPatientList(input)}
+            onSubmit={() => getPatientList(input, 5)}
+            selected={setSelectedPatient}
           />
           <Text>{state.errorMessage}</Text>
-          <PostureList
-            value={state.postures}
-            onClickk={removePosture}
-            add={add}
-          />
+          <PostureList value={selected} onRemove={removePosture} />
         </View>
       </ScrollView>
 
       <View style={styles.bottomBox}>
-        <TouchableOpacity style={styles.submitContainer} title="Submit">
+        <TouchableOpacity
+          style={styles.submitContainer}
+          title="Submit"
+          onPress={() =>
+            storeAppointment(
+              topic,
+              date,
+              startTime,
+              endTime,
+              selectedPatient,
+              selected
+            )
+          }
+        >
           <Text style={styles.submitText}>Create</Text>
         </TouchableOpacity>
       </View>
