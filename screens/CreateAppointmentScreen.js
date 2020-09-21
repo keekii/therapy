@@ -35,15 +35,6 @@ const CreateAppointmentScreen = ({ navigation }) => {
     getPatientList(input, 5);
   }, []);
 
-  const data = [
-    {
-      isSelected: true,
-      key: "user-key",
-      name: "Tasanai",
-      profile_pic: undefined,
-    },
-  ];
-
   return (
     <>
       <View style={styles.topBox}>
@@ -84,7 +75,12 @@ const CreateAppointmentScreen = ({ navigation }) => {
             selected={setSelectedPatient}
           />
           <Text>{state.errorMessage}</Text>
-          <PostureList value={selected} onRemove={removePosture} />
+          <PostureList
+            value={selected}
+            onRemove={removePosture}
+            textEnabled={true}
+            removeEnabled={true}
+          />
         </View>
       </ScrollView>
 

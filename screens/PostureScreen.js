@@ -81,7 +81,6 @@ const PostureScreen = ({ navigation }) => {
           <View style={styles.btnBox}>
             <TouchableOpacity
               style={styles.submitContainer}
-              title="Save"
               onPress={() => navigation.pop()}
             >
               <Text style={styles.submitText}>Save</Text>

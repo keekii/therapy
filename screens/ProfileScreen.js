@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -12,14 +12,17 @@ import {
 import Theme, { fontFamily } from "../constants/Theme";
 import InputTextField from "../components/InputTextField";
 import { TextInput } from "react-native-paper";
+import { Context as AuthContext } from "../context/AuthContext";
+import { Context as CalendarContext } from "../context/CalendarContext";
+import { NavigationEvents } from "react-navigation";
 
 const ProfileScreen = ({ navigation }) => {
-  const [displayName, setDisplayName] = useState("");
-  const [mobile, setMobile] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("");
-  const [sex, setSex] = useState("");
+  const { getProfile, state } = useContext(AuthContext);
+  const { name, dateOfBirth, phone } = state.userProfile;
+
   return (
     <View style={styles.container}>
+      <NavigationEvents onWillFocus={getProfile} />
       <View style={styles.topBox}>
         <Image
           style={styles.profilePic}
@@ -28,7 +31,7 @@ const ProfileScreen = ({ navigation }) => {
               "https://www.seekpng.com/png/full/506-5061704_cool-profile-avatar-picture-cool-picture-for-profile.png",
           }}
         ></Image>
-        <Text style={styles.fullName}>KEEKII</Text>
+        <Text style={styles.fullName}>{name}</Text>
       </View>
 
       <View style={styles.bottomBox}>
@@ -39,17 +42,12 @@ const ProfileScreen = ({ navigation }) => {
             onChange={setDisplayName}
             data={displayName}
           /> */}
-          <InputTextField
-            label="USER ID"
-            data={displayName}
-            edit={false}
-            onChange={setDisplayName}
-          />
+          <InputTextField label="USER ID" data={name} edit={false} />
           <InputTextField label="EMAIL" data="keekii@gmail.com" edit={false} />
-          <InputTextField label="MOBILE" data="0869606858" edit={false} />
+          <InputTextField label="MOBILE" data={phone} edit={false} />
           <InputTextField
             label="DATE OF BIRTH"
-            data="17/06/2538"
+            data={dateOfBirth}
             edit={false}
           />
         </ScrollView>

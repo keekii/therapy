@@ -10,6 +10,8 @@ const patientReducer = (state, action) => {
       return { ...state, patients: [] };
     case "get_patient":
       return { ...state, patients: action.payload, errorMessage: "" };
+    case "clear_person":
+      return { ...state, person: [] };
     default:
       return state;
   }
@@ -55,6 +57,10 @@ const getPatientList = (dispatch) => async (text) => {
   } catch (err) {
     console.log(err);
   }
+};
+
+const clearPerson = (dispatch) => () => {
+  dispatch({ type: "clear_person" });
 };
 
 export const { Provider, Context } = createDataContext(

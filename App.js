@@ -21,7 +21,10 @@ import AppointmentDetailScreen from "./screens/AppointmentDetailScreen";
 import EditAppointmentScreen from "./screens/EditAppointmentScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import CalendarScreen from "./screens/CalendarScreen";
+import TaskEvaluateScreen from "./screens/TaskEvaluateScreen";
+import TaskScreen from "./screens/TaskScreen";
 import LoadingScreen from "./screens/LoadingScreen";
+import TaskPostureDetailScreen from "./screens/TaskPostureDetailScreen";
 
 const switchNavigator = createSwitchNavigator({
   Loading: LoadingScreen,
@@ -42,6 +45,11 @@ const switchNavigator = createSwitchNavigator({
     patientFlow: createStackNavigator({
       Patient: PatientScreen,
       PatientDetail: PatientDetailScreen,
+    }),
+    taskFlow: createStackNavigator({
+      Task: TaskScreen,
+      TaskEvaluate: TaskEvaluateScreen,
+      TaskPostureDetail: TaskPostureDetailScreen,
     }),
     profileFlow: createStackNavigator({
       Profile: ProfileScreen,
@@ -87,6 +95,18 @@ PatientDetailScreen.navigationOptions = () => {
 };
 
 ProfileScreen.navigationOptions = () => {
+  return {
+    header: () => false,
+  };
+};
+
+TaskScreen.navigationOptions = () => {
+  return {
+    header: () => false,
+  };
+};
+
+TaskEvaluateScreen.navigationOptions = () => {
   return {
     header: () => false,
   };

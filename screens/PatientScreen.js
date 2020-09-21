@@ -1,19 +1,31 @@
 import React, { useContext, useState, useEffect } from "react";
-import { View, StyleSheet, Text, TextInput, Image } from "react-native";
+import { View, StyleSheet, Text, TextInput, Image, Button } from "react-native";
 import { FlatList, TouchableOpacity } from "react-native-gesture-handler";
 import { Context as CalendarContext } from "../context/CalendarContext";
+import { Context as AuthContext } from "../context/AuthContext";
 import Theme, { fontFamily } from "../constants/Theme";
+import { NavigationEvents } from "react-navigation";
 
 const PatientScreen = ({ navigation }) => {
-  const { getPatientList, state } = useContext(CalendarContext);
-  const { patients } = state;
+  const {
+    getPatientList,
+    state,
+    clearPatient,
+    getPatientListScreen,
+  } = useContext(CalendarContext);
+  const { signout } = useContext(AuthContext);
+  const { patientScreen } = state;
   const [input, setInput] = useState("");
+
+  // console.log("Patients ", state.patients);
+  // console.log("Patients Screen ", patientScreen);
   useEffect(() => {
-    getPatientList("T", 10);
-  }, []);
+    getPatientListScreen("T", 10);
+  }, [input]);
 
   return (
     <View style={styles.container}>
+      <NavigationEvents onWillFocus={clearPatient} />
       <Text style={styles.title}>PATIENT SEARCH</Text>
 
       <View style={styles.inputContainer}>
@@ -33,12 +45,20 @@ const PatientScreen = ({ navigation }) => {
         />
       </View>
       <FlatList
-        data={patients}
-        keyExtractor={(item) => item.name}
-        renderItem={({ item }) => {
+        data={patientScreen}
+        keyExtractor={(item) => item.key}
+        renderItem={({ item, index }) => {
           return (
             <TouchableOpacity
-              onPress={() => navigation.navigate("PatientDetail")}
+              key={item.key + ":" + index}
+              onPress={() =>
+                navigation.navigate("PatientDetail", {
+                  key: item.key,
+                  name: item.name,
+                  selected: item.isSelected,
+                  profile: item.profile_pic,
+                })
+              }
             >
               <View style={styles.notificationBox}>
                 <Image
@@ -52,26 +72,7 @@ const PatientScreen = ({ navigation }) => {
           );
         }}
       />
-
-      {/* {result.map((item) =>
-        item.isSelected === true ? (
-          <TouchableOpacity key={item.key} onPress={() => selected(item.key)}>
-            <View style={styles.notificationBox2}>
-              <Image style={styles.image} source={{ uri: item.profile_pic }} />
-
-              <Text style={styles.name}>{item.name}</Text>
-            </View>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity key={item.key} onPress={() => selected(item.key)}>
-            <View style={styles.notificationBox}>
-              <Image style={styles.image} source={{ uri: item.profile_pic }} />
-
-              <Text style={styles.name}>{item.name}</Text>
-            </View>
-          </TouchableOpacity>
-        )
-      )} */}
+      <Button title="Signout" onPress={signout} />
     </View>
   );
 };

@@ -5,11 +5,13 @@ import { Context as CalendarContext } from "../context/CalendarContext";
 import Theme, { fontFamily } from "../constants/Theme";
 import { ScrollView } from "react-native-gesture-handler";
 
-const PostureDetailScreen = ({ navigation }) => {
-  const { state, getPosture } = useContext(CalendarContext);
-  const postures = state.postures.find(
+const TaskPostureDetailScreen = ({ navigation }) => {
+  const { state } = useContext(CalendarContext);
+  const postures = state.tasks[0].postures;
+  const currentPosture = postures.find(
     (posture) => posture.key === navigation.getParam("id")
   );
+  const { comment, rate, key, name } = currentPosture;
 
   return (
     <ScrollView style={styles.container}>
@@ -19,7 +21,7 @@ const PostureDetailScreen = ({ navigation }) => {
             javaScriptEnabled={true}
             domStorageEnabled={true}
             source={{
-              uri: postures.vid,
+              uri: currentPosture.vid,
             }}
           />
         </View>
@@ -46,7 +48,7 @@ const PostureDetailScreen = ({ navigation }) => {
               marginBottom: 12,
             }}
           >
-            <Text>{postures.name}</Text>
+            <Text>{currentPosture.name}</Text>
           </View>
           <Text
             style={{
@@ -67,14 +69,21 @@ const PostureDetailScreen = ({ navigation }) => {
               marginBottom: 8,
             }}
           >
-            {postures.des}
+            {currentPosture.des}
           </Text>
 
           <TouchableOpacity
             style={styles.submitContainer}
-            onPress={() => navigation.pop()}
+            onPress={() =>
+              navigation.navigate("TaskEvaluate", {
+                comment,
+                key,
+                name,
+                rate,
+              })
+            }
           >
-            <Text style={styles.submitText}>Close</Text>
+            <Text style={styles.submitText}>Next Step</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -82,7 +91,7 @@ const PostureDetailScreen = ({ navigation }) => {
   );
 };
 
-PostureDetailScreen.navigationOptions = () => {
+TaskPostureDetailScreen.navigationOptions = () => {
   return {
     header: () => false,
   };
@@ -109,4 +118,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PostureDetailScreen;
+export default TaskPostureDetailScreen;

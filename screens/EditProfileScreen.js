@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -8,17 +8,24 @@ import {
   TouchableOpacity,
   Switch,
 } from "react-native";
+import firebase from "../database/firebase";
 
 import Theme, { fontFamily } from "../constants/Theme";
 import InputTextField from "../components/InputTextField";
 import { TextInput } from "react-native-paper";
+import { Context as AuthContext } from "../context/AuthContext";
+import { Context as CalendarContext } from "../context/CalendarContext";
+import { NavigationEvents } from "react-navigation";
 
 const EditProfileScreen = ({ navigation }) => {
-  const [displayName, setDisplayName] = useState("KEEKII Q");
+  const { updateProfile, state } = useContext(AuthContext);
+  const { name, dateOfBirth, phone } = state.userProfile;
+  const [displayName, setDisplayName] = useState(name);
   const [email, setEmail] = useState("keekii@gmail.com");
-  const [mobile, setMobile] = useState("0869606858");
-  const [dateOfBirth, setDateOfBirth] = useState("17/06/2538");
+  const [mobile, setMobile] = useState(phone);
+  const [date, setDateOfBirth] = useState(dateOfBirth);
   const [sex, setSex] = useState("");
+
   return (
     <View style={styles.container}>
       <View style={styles.topBox}>
@@ -55,7 +62,7 @@ const EditProfileScreen = ({ navigation }) => {
           />
           <InputTextField
             label="DATE OF BIRTH"
-            data={dateOfBirth}
+            data={date}
             edit={true}
             onChange={setDateOfBirth}
           />
@@ -63,7 +70,7 @@ const EditProfileScreen = ({ navigation }) => {
 
         <TouchableOpacity
           style={styles.submitContainer}
-          onPress={() => navigation.navigate("Profile")}
+          onPress={() => updateProfile(displayName, dateOfBirth, mobile)}
         >
           <Text style={styles.submitText}>Save</Text>
         </TouchableOpacity>
