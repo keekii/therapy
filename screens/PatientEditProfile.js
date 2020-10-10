@@ -20,8 +20,10 @@ import { AntDesign } from "@expo/vector-icons";
 
 import firebase from "../database/firebase";
 
-const EditProfileScreen = ({ navigation }) => {
-  const { updateProfile, state, clearUser, signout } = useContext(AuthContext);
+const PatientEditProfileScreen = ({ navigation }) => {
+  const { patientUpdateProfile, state, clearUser, signout } = useContext(
+    AuthContext
+  );
   const { name, dateOfBirth, phone, profile_pic, sex } = state.userProfile;
   const [displayName, setDisplayName] = useState(name);
   const [mobile, setMobile] = useState(phone);
@@ -216,7 +218,7 @@ const EditProfileScreen = ({ navigation }) => {
           <TouchableOpacity
             style={styles.submitContainer}
             onPress={() =>
-              updateProfile(displayName, date, mobile, realUrl, _sex)
+              patientUpdateProfile(displayName, date, mobile, realUrl, _sex)
             }
           >
             <Text style={styles.submitText}>Save</Text>
@@ -346,4 +348,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EditProfileScreen;
+export default PatientEditProfileScreen;

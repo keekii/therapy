@@ -12,13 +12,12 @@ import { NavigationEvents } from "react-navigation";
 const PatientDetailScreen = ({ navigation }) => {
   useEffect(() => {
     const key = navigation.getParam("key");
-    const name = navigation.getParam("name");
-    const profile = navigation.getParam("profile");
-    getPatientDetail(key, name, profile);
+    getPatientDetail(key);
   }, []);
 
   const { getPatientDetail, state, clearPerson } = useContext(CalendarContext);
   const { person } = state;
+
   return (
     <>
       <NavigationEvents onWillFocus={clearPerson} />
@@ -35,14 +34,14 @@ const PatientDetailScreen = ({ navigation }) => {
                 renderItem={({ item, index }) => {
                   return (
                     <List.Accordion
-                      key={item.key + ":" + index}
+                      key={item.date + ":" + index}
                       title={item.date}
                       style={styles.headerContainer}
                     >
                       {item.postures &&
                         item.postures.map((posture, i) => (
                           <View
-                            key={posture + ":" + i}
+                            key={posture.key + ":" + i}
                             style={styles.itemContainer}
                           >
                             <View style={styles.itemTitleContainer}>
@@ -57,6 +56,7 @@ const PatientDetailScreen = ({ navigation }) => {
                                 ratingCount={5}
                                 imageSize={18}
                                 ratingBackgroundColor="#F3F3F3"
+                                readonly={true}
                               />
                             </View>
                             <Text style={styles.commentTitle}>Comment:</Text>

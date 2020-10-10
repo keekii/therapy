@@ -6,13 +6,16 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
+  Alert,
 } from "react-native";
-import { NavigationEvents } from "react-navigation";
-import InputTextField from "../components/InputTextField";
+
 import PatientList from "../components/PatientList";
 import PostureList from "../components/PostureList";
 import { fontFamily } from "../constants/Theme";
 import { Context as CalendarContext } from "../context/CalendarContext";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import moment from "moment";
+import { AntDesign } from "@expo/vector-icons";
 
 const EditAppointmentScreen = ({ navigation }) => {
   const {
@@ -41,10 +44,91 @@ const EditAppointmentScreen = ({ navigation }) => {
   const [_startTime, setStartTime] = useState(start_time);
   const [_endTime, setEndTime] = useState(end_time);
   const [input, setInput] = useState("");
+  const [initDate, _setDate] = useState(new Date(1598051730000));
+  const [mode, setMode] = useState("date");
+  const [show, setShow] = useState(false);
+  const [dateTimeStatus, setDateTimeStatus] = useState(false);
+  const [startTimeStatus, setStartTimeStatus] = useState(false);
+  const [endTimeStatus, setEndTimeStatus] = useState(false);
+
+  console.log(patients);
 
   useEffect(() => {
-    setInitial(patient, postures);
+    let initPatient = [];
+    initPatient = patient;
+    setInitial(initPatient, postures);
+    console.log(patients);
   }, []);
+
+  const onDateTimeChange = (event, selectedDate) => {
+    const currentDate = selectedDate || initDate;
+    let date = currentDate;
+    let correctDate = moment(date, "YYYY-MM-DDTHH: HH:mm").format("YYYY-MM-DD");
+    setShow(Platform.OS === "ios");
+    setDate(correctDate);
+    _setDate(currentDate);
+  };
+
+  const onStartTimeChange = (event, selectedDate) => {
+    const currentDate = selectedDate || initDate;
+    let date = currentDate;
+    let correctDate = moment(date, "YYYY-MM-DDTHH: HH:mm").format("HH.mm");
+    correctDate;
+    setShow(Platform.OS === "ios");
+    setStartTime(correctDate);
+    _setDate(currentDate);
+  };
+
+  const onEndTimeChange = (event, selectedDate) => {
+    const currentDate = selectedDate || initDate;
+    let date = currentDate;
+    let correctDate = moment(date, "YYYY-MM-DDTHH: HH:mm").format("HH.mm");
+
+    setShow(Platform.OS === "ios");
+    setEndTime(correctDate);
+    _setDate(currentDate);
+  };
+
+  const showMode = (currentMode) => {
+    setShow(true);
+    setMode(currentMode);
+  };
+
+  const showDateTimepicker = () => {
+    showMode("date");
+    setDateTimeStatus(!dateTimeStatus);
+  };
+
+  const showStartTimepicker = () => {
+    showMode("time");
+    setEndTimeStatus(false);
+    setStartTimeStatus(!startTimeStatus);
+  };
+
+  const showEndTimepicker = () => {
+    showMode("time");
+    setStartTimeStatus(false);
+    setEndTimeStatus(!endTimeStatus);
+  };
+
+  const clickHandle = () => {
+    _topic &&
+    _date &&
+    _startTime &&
+    _endTime &&
+    selectedPatient.length !== 0 &&
+    selected
+      ? editAppointment(
+          key,
+          _topic,
+          _date,
+          _startTime,
+          _endTime,
+          selectedPatient,
+          selected
+        )
+      : Alert.alert("Error", "Please fill all form");
+  };
 
   return (
     <>
@@ -61,23 +145,76 @@ const EditAppointmentScreen = ({ navigation }) => {
 
       <ScrollView style={styles.container}>
         <View style={styles.midBox}>
-          <InputTextField label="DATE" data={_date} onChange={setDate} />
+          <Text style={styles.label}> DATE </Text>
+          <View style={styles.inputContainer}>
+            <Text style={styles.input}> {_date} </Text>
+            <TouchableOpacity onPress={showDateTimepicker}>
+              <AntDesign style={{ marginRight: 5 }} name="calendar" size={20} />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.borderLine}></View>
+          {dateTimeStatus && (
+            <DateTimePicker
+              testID="dateTimePicker"
+              value={initDate}
+              mode={mode}
+              is24Hour={true}
+              display="default"
+              onChange={onDateTimeChange}
+            />
+          )}
           <View style={styles.timeBox}>
             <View style={{ width: "50%", paddingRight: 20 }}>
-              <InputTextField
-                label="START TIME"
-                data={_startTime}
-                onChange={setStartTime}
-              />
+              <Text style={styles.label}> START TIME </Text>
+              <View style={styles.inputContainer}>
+                <Text style={styles.input}> {_startTime} </Text>
+                <TouchableOpacity onPress={showStartTimepicker}>
+                  <AntDesign
+                    style={{ marginRight: 5 }}
+                    name="calendar"
+                    size={20}
+                  />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.borderLine}></View>
             </View>
             <View style={{ width: "50%" }}>
-              <InputTextField
-                label="END TIME"
-                data={_endTime}
-                onChange={setEndTime}
-              />
+              <Text style={styles.label}> START TIME </Text>
+              <View style={styles.inputContainer}>
+                <Text style={styles.input}> {_endTime} </Text>
+                <TouchableOpacity onPress={showEndTimepicker}>
+                  <AntDesign
+                    style={{ marginRight: 5 }}
+                    name="calendar"
+                    size={20}
+                  />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.borderLine}></View>
             </View>
           </View>
+
+          {startTimeStatus && (
+            <DateTimePicker
+              testID="dateTimePicker"
+              value={initDate}
+              mode={mode}
+              is24Hour={true}
+              display="default"
+              onChange={onStartTimeChange}
+            />
+          )}
+
+          {endTimeStatus && (
+            <DateTimePicker
+              testID="dateTimePicker"
+              value={initDate}
+              mode={mode}
+              is24Hour={true}
+              display="default"
+              onChange={onEndTimeChange}
+            />
+          )}
           <PatientList
             result={patients}
             value={input}
@@ -100,17 +237,7 @@ const EditAppointmentScreen = ({ navigation }) => {
         <TouchableOpacity
           style={styles.submitContainer}
           title="Submit"
-          onPress={() =>
-            editAppointment(
-              key,
-              _topic,
-              _date,
-              _startTime,
-              _endTime,
-              selectedPatient,
-              selected
-            )
-          }
+          onPress={() => clickHandle()}
         >
           <Text style={styles.submitText}>Save</Text>
         </TouchableOpacity>
@@ -183,6 +310,37 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
+  },
+  label: {
+    color: "#1D2029",
+    fontSize: 14,
+    fontWeight: "600",
+    fontFamily,
+    marginTop: 24,
+  },
+  input: {
+    paddingVertical: 12,
+    color: "#1D2029",
+    fontSize: 14,
+    fontFamily,
+    flex: 1,
+  },
+  borderLine: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#D8D8D8",
+  },
+  inputContainer: {
+    height: 45,
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  icon: {
+    width: 30,
+    height: 30,
+  },
+  iconBtnSearch: {
+    alignSelf: "center",
   },
 });
 

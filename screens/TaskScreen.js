@@ -4,104 +4,109 @@ import { Button, List } from "react-native-paper";
 import { Rating, AirbnbRating } from "react-native-ratings";
 import Theme, { fontFamily } from "../constants/Theme";
 import { Context as CalendarContext } from "../context/CalendarContext";
+import { Context as AuthContext } from "../context/AuthContext";
 import { FlatList } from "react-native-gesture-handler";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const TaskScreen = ({ navigation }) => {
-  const { state, getTaskList, getPosture } = useContext(CalendarContext);
+  const { state, getTaskList } = useContext(CalendarContext);
   const { tasks } = state;
 
   useEffect(() => {
     getTaskList();
+    console.log(tasks);
   }, []);
 
   return (
-    <>
-      <View style={styles.container}>
-        <Text style={styles.patientTitle}>TASK DETAIL</Text>
-        {tasks.length !== 0 ? (
-          <View style={styles.listContainer}>
-            <List.Section>
-              <FlatList
-                data={tasks}
-                keyExtractor={(item) => {
-                  return item.key;
-                }}
-                renderItem={({ item, index }) => {
-                  return (
-                    <List.Accordion
-                      key={item.key + ":" + index}
-                      title={item.date}
-                      style={styles.headerContainer}
-                    >
-                      {item.postures &&
-                        item.postures.map((posture, i) => {
-                          if (posture) {
-                            return (
-                              <View
-                                key={posture.name + ":" + i}
-                                style={styles.postureContainer}
-                              >
-                                <List.Item title={posture.name} />
-                                <View style={styles._itemContainer}>
-                                  <Image
-                                    style={[styles.thumbnail, styles.inputIcon]}
-                                    source={require("../assets/thumbnail.jpg")}
-                                  />
-                                  <TouchableOpacity
-                                    onPress={() =>
-                                      navigation.navigate("TaskPostureDetail", {
-                                        id: posture.key,
-                                      })
-                                    }
-                                  >
-                                    <Text style={styles.removeText}>View</Text>
-                                  </TouchableOpacity>
-                                </View>
-                              </View>
-                            );
-                          } else {
-                            return (
-                              <View
-                                key={posture + ":" + i}
-                                style={styles.itemContainer}
-                              >
-                                <View style={styles.itemTitleContainer}>
-                                  <Text style={styles.postureTitle}>
-                                    {posture.name}
-                                  </Text>
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.patientTitle}>TASK DETAIL</Text>
 
-                                  <Rating
-                                    type="star"
-                                    startingValue={posture.rate}
-                                    ratingColor="#f1c40f"
-                                    ratingCount={5}
-                                    imageSize={18}
-                                    ratingBackgroundColor="#F3F3F3"
-                                  />
-                                </View>
-                                <Text style={styles.commentTitle}>
-                                  Comment:
-                                </Text>
-                                <View style={styles.commentContainer}>
-                                  <Text style={styles.commentText}>
-                                    {posture.comment}
-                                  </Text>
-                                </View>
+      {tasks.length !== 0 ? (
+        <View style={styles.listContainer}>
+          <List.Section>
+            <FlatList
+              data={tasks}
+              keyExtractor={(item) => {
+                return item.topic;
+              }}
+              renderItem={({ item, index }) => {
+                return (
+                  <List.Accordion
+                    key={item.topic + ":" + index}
+                    title={item.date}
+                    style={styles.headerContainer}
+                  >
+                    {item.postures &&
+                      item.postures.map((posture, i) => {
+                        if (!posture.comment && !posture.rate) {
+                          return (
+                            <View
+                              key={posture.name + ":" + i}
+                              style={styles.postureContainer}
+                            >
+                              <List.Item title={posture.name} />
+                              <View style={styles._itemContainer}>
+                                <Image
+                                  style={[styles.thumbnail, styles.inputIcon]}
+                                  source={require("../assets/thumbnail.jpg")}
+                                />
+                                <TouchableOpacity
+                                  onPress={() =>
+                                    navigation.navigate(
+                                      "PatientTaskPostureDetail",
+                                      {
+                                        id: posture.key,
+                                        task_id: item.task_id,
+                                      }
+                                    )
+                                  }
+                                >
+                                  <Text style={styles.removeText}>View</Text>
+                                </TouchableOpacity>
                               </View>
-                            );
-                          }
-                        })}
-                    </List.Accordion>
-                  );
-                }}
-              />
-            </List.Section>
-          </View>
-        ) : (
-          <Text>Hi edok not found baby</Text>
-        )}
-      </View>
-    </>
+                            </View>
+                          );
+                        } else {
+                          return (
+                            <View
+                              key={posture + ":" + i}
+                              style={styles.itemContainer}
+                            >
+                              <View style={styles.itemTitleContainer}>
+                                <Text style={styles.postureTitle}>
+                                  {posture.name}
+                                </Text>
+
+                                <Rating
+                                  type="star"
+                                  startingValue={posture.rate}
+                                  ratingColor="#f1c40f"
+                                  ratingCount={5}
+                                  imageSize={18}
+                                  ratingBackgroundColor="red"
+                                  readonly={true}
+                                />
+                              </View>
+                              <Text style={styles.commentTitle}>Comment:</Text>
+                              <View style={styles.commentContainer}>
+                                <Text style={styles.commentText}>
+                                  {posture.comment}
+                                </Text>
+                              </View>
+                            </View>
+                          );
+                        }
+                      })}
+                  </List.Accordion>
+                );
+              }}
+            />
+          </List.Section>
+        </View>
+      ) : (
+        <Text>Hi edok not found baby</Text>
+      )}
+    </SafeAreaView>
   );
 };
 
@@ -110,7 +115,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     paddingHorizontal: 20,
-    paddingTop: 50,
+    paddingTop: 20,
   },
   headerContainer: { backgroundColor: "#F0EDED", fontFamily },
 

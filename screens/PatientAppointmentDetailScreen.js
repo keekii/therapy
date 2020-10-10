@@ -13,10 +13,8 @@ import InputTextField from "../components/InputTextField";
 import PostureList from "../components/PostureList";
 import Theme, { fontFamily } from "../constants/Theme";
 import { Context as CalendarContext } from "../context/CalendarContext";
-import { Ionicons } from "@expo/vector-icons";
-import { auth } from "firebase";
 
-const AppointmentDetailScreen = ({ navigation }) => {
+const PatientAppointmentDetailScreen = ({ navigation }) => {
   const { state, getAppointmentById, deleteAppointment } = useContext(
     CalendarContext
   );
@@ -31,7 +29,6 @@ const AppointmentDetailScreen = ({ navigation }) => {
     postures,
   } = appointmentData;
 
-  const [modal, setModal] = useState(false);
   console.log(patient);
 
   useEffect(() => {
@@ -67,8 +64,7 @@ const AppointmentDetailScreen = ({ navigation }) => {
             </View>
           </View>
           <Text style={styles.title}>Patients</Text>
-
-          {patient.length !== 0
+          {patient
             ? patient.map((item, index) => {
                 return (
                   <View
@@ -93,84 +89,6 @@ const AppointmentDetailScreen = ({ navigation }) => {
           />
         </View>
       </ScrollView>
-
-      <View style={styles.bottomBox}>
-        <TouchableOpacity
-          style={styles.submitContainer}
-          onPress={() => navigation.navigate("EditAppointment")}
-        >
-          <Text style={styles.submitText}>Edit</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.deleteContainer}
-          title="Delete"
-          onPress={() => {
-            setModalVisible(true);
-          }}
-        >
-          <Text style={styles.deleteText}>Delete</Text>
-        </TouchableOpacity>
-      </View>
-
-      <Modal onRequestClose={() => setModalVisible(false)} visible={modal}>
-        <View
-          style={{
-            height: "100%",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: "white",
-              padding: 25,
-              marginHorizontal: 25,
-            }}
-          >
-            <View
-              style={{
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Text style={styles.modalText}>
-                Do you want to delete this appointments ?
-              </Text>
-              <Ionicons
-                name="md-trash"
-                size={30}
-                color={Theme.COLORS.PRIMARY}
-              />
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                }}
-              >
-                <TouchableOpacity
-                  style={styles.modalDeleteContainer}
-                  title="Cancel"
-                  onPress={() => setModalVisible(false)}
-                >
-                  <Text style={styles.modalDeleteText}>Cancel</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.modalSubmitContainer}
-                  title="Submit"
-                  onPress={() => {
-                    setModalVisible(false);
-                    deleteAppointment(key);
-                  }}
-                >
-                  <Text style={styles.modalSubmitText}>Submit</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </View>
-      </Modal>
     </>
   );
 };
@@ -324,4 +242,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AppointmentDetailScreen;
+export default PatientAppointmentDetailScreen;

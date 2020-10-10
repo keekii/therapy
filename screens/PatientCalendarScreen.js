@@ -1,28 +1,23 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, memo } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Agenda } from "react-native-calendars";
 import moment from "moment";
 import { Context as CalendarContext } from "../context/CalendarContext";
+import { NavigationEvents } from "react-navigation";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const CalendarScreen = ({ navigation }) => {
+const PatientCalendarScreen = ({ navigation }) => {
   const today = moment().format("YYYY-MM-DD");
-  const { getItems, state, unsubscribe } = useContext(CalendarContext);
+  const { getPatientItems, state, setItems } = useContext(CalendarContext);
+  const [data, setData] = useState({});
   const { appointments } = state;
-
-  useEffect(() => {
-    getItems();
-    return () => {
-      unsubscribe();
-    };
-  }, []);
 
   const rowHasChanged = (r1, r2) => {
     return r1.name !== r2.name;
   };
 
   const loadItems = (day) => {
-    getItems(day);
+    getPatientItems(day);
   };
 
   const renderItem = (item) => {
@@ -30,7 +25,7 @@ const CalendarScreen = ({ navigation }) => {
       <TouchableOpacity
         style={[styles.item]}
         onPress={() =>
-          navigation.navigate("AppointmentDetail", {
+          navigation.navigate("PatientAppointmentDetail", {
             key: item.key,
           })
         }
@@ -48,7 +43,18 @@ const CalendarScreen = ({ navigation }) => {
       </View>
     );
   };
-
+  const mockData = {
+    "2020-09-25": [
+      {
+        name: "Test 1",
+        date: "1",
+      },
+      {
+        name: "Test 1",
+        date: "1",
+      },
+    ],
+  };
   return (
     <SafeAreaView style={styles.container}>
       {/* <NavigationEvents onWillFocus={getPatientItems} /> */}
@@ -60,12 +66,6 @@ const CalendarScreen = ({ navigation }) => {
         renderEmptyDate={renderEmptyDate}
         rowHasChanged={rowHasChanged}
       />
-      <TouchableOpacity
-        style={styles.submitContainer}
-        onPress={() => navigation.navigate("CreateAppointment")}
-      >
-        <Text style={styles.submitText}>Create appointments</Text>
-      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -103,4 +103,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CalendarScreen;
+export default memo(PatientCalendarScreen);

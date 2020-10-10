@@ -12,6 +12,7 @@ const InputTextField = ({ label, data, edit, onChange }) => {
         onChangeText={onChange}
         value={data}
       ></TextInput>
+
       <View style={styles.borderLine}></View>
     </>
   );

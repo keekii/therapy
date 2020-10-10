@@ -12,10 +12,11 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
+secondaryApp = firebase.initializeApp(firebaseConfig, "Secondary");
 
 firebase.firestore();
 
-export default firebase;
+export default (firebase, secondaryApp);
 
 // import firebase from "firebase";
 

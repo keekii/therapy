@@ -90,26 +90,27 @@ const calendarReducer = (state, action) => {
       return { ...state, index: action.payload };
     case "get_patient_screen":
       return { ...state, patientScreen: action.payload };
+
     case "clear_task":
       return { ...state, currentPosture: {} };
+    case "set_task_id":
+      return { ...state, currentTaskId: action.payload };
+    case "set_items":
+      return { ...state, appointments: action.payload };
     default:
       return state;
   }
 };
 
-const getPatientDetail = (dispatch) => (key, name, profile) => {
-  try {
-    const initialBoolean = true;
+const getPatientDetail = (dispatch) => (key) => {
+  let usersArr = [];
+  const initialBoolean = true;
+  const docRef = firebase.firestore().collection("appointments");
+  const query = docRef.where("patient_uid", "==", key);
 
-    const docRef = firebase.firestore().collection("appointments");
-    const query = docRef.where("patient", "array-contains", {
-      isSelected: initialBoolean,
-      key: key,
-      name: name,
-      profile_pic: profile,
-    });
-    const usersArr = [];
+  try {
     getCollection = (querySnapshot) => {
+      usersArr = [];
       querySnapshot.forEach((res) => {
         const {
           date,
@@ -162,19 +163,27 @@ const storeAppointment = (dispatch) => async (
   patient,
   postures
 ) => {
-  try {
-    const uid = await firebase.auth().currentUser.uid;
-    const dbRef = firebase.firestore().collection("appointments");
+  const uid = await firebase.auth().currentUser.uid;
+  const dbRef = firebase.firestore().collection("appointments");
+  const patient_uid = patient[0].key;
 
-    await dbRef.add({
-      topic: topic,
-      date: date,
-      start_time: start,
-      end_time: end,
-      uid: uid,
-      patient: patient,
-      postures: postures,
-    });
+  try {
+    dbRef
+      .add({
+        topic: topic,
+        date: date,
+        start_time: start,
+        end_time: end,
+        uid: uid,
+        patient: patient,
+        patient_uid: patient_uid,
+        postures: postures,
+      })
+      .then(function (docRef) {
+        const id = docRef.id;
+        const dbRef = firebase.firestore().collection("appointments").doc(id);
+        dbRef.update({ key: id }).then(console.log("Success add id !!!"));
+      });
     navigate("Calendar");
     console.log("Success");
   } catch (err) {
@@ -191,9 +200,10 @@ const editAppointment = (dispatch) => async (
   patient,
   postures
 ) => {
+  const uid = await firebase.auth().currentUser.uid;
+  const dbRef = firebase.firestore().collection("appointments").doc(key);
+  const patient_uid = patient[0].key;
   try {
-    const uid = await firebase.auth().currentUser.uid;
-    const dbRef = firebase.firestore().collection("appointments").doc(key);
     await dbRef.set({
       key,
       topic,
@@ -203,6 +213,7 @@ const editAppointment = (dispatch) => async (
       uid,
       patient,
       postures,
+      patient_uid: patient_uid,
     });
     navigate("Calendar");
     console.log("Success");
@@ -222,10 +233,12 @@ const setSelected = (dispatch) => (key) => {
 };
 
 const getPosture = (dispatch) => async () => {
+  let data = [];
+  const firestoreRef = await firebase.firestore().collection("postures");
+
   try {
-    const firestoreRef = await firebase.firestore().collection("postures");
-    const data = [];
     const getCollection = (querySnapshot) => {
+      data = [];
       querySnapshot.forEach((res) => {
         const { des, name, thumbnail, vid } = res.data();
         data.push({
@@ -248,12 +261,24 @@ const removePosture = (dispatch) => (id) => {
   dispatch({ type: "remove_posture", payload: id });
 };
 
-const getItems = (dispatch) => async () => {
+const getItems = (dispatch) => async (day) => {
+  let data = {};
+  const uid = await firebase.auth().currentUser.uid;
+  const firestoreRef = await firebase
+    .firestore()
+    .collection("appointments")
+    .where("uid", "==", uid);
+
+  const timeToString = (time) => {
+    const date = new Date(time);
+    return date.toISOString().split("T")[0];
+  };
+
   try {
-    const firestoreRef = await firebase.firestore().collection("appointments");
-    const data = {};
-    const getCollection = (querySnapshot) => {
-      querySnapshot.forEach((res) => {
+    const getCollection = async (querySnapshot) => {
+      let count = 0;
+      data = {};
+      await querySnapshot.forEach((res) => {
         const {
           date,
           topic,
@@ -263,20 +288,59 @@ const getItems = (dispatch) => async () => {
           postures,
           uid,
         } = res.data();
-        data[date] = [];
-        data[date].push({
-          key: res.id,
-          date,
-          topic,
-          start_time,
-          end_time,
-          patient,
-          postures,
-          uid,
-        });
+
+        if (data[date]) {
+          for (key in data) {
+            if (key === date) {
+              data[date].push({
+                key: res.id,
+                date,
+                topic,
+                start_time,
+                end_time,
+                patient,
+                postures,
+                uid,
+              });
+            }
+          }
+        } else {
+          data[date] = [];
+          data[date].push({
+            key: res.id,
+            date,
+            topic,
+            start_time,
+            end_time,
+            patient,
+            postures,
+            uid,
+          });
+        }
       });
+
+      setTimeout(() => {
+        try {
+          for (let i = -15; i < 85; i++) {
+            const time = day.timestamp + i * 24 * 60 * 60 * 1000;
+            if (time) {
+              const strTime = timeToString(time);
+              if (!data[strTime]) {
+                data[strTime] = [];
+              }
+            }
+          }
+
+          const newItems = {};
+          Object.keys(data).forEach((key) => {
+            newItems[key] = data[key];
+          });
+          dispatch({ type: "get_data", payload: newItems });
+        } catch (err) {
+          console.log(err);
+        }
+      }, 1000);
     };
-    dispatch({ type: "get_data", payload: data });
 
     await firestoreRef.onSnapshot(getCollection);
   } catch (err) {
@@ -284,22 +348,114 @@ const getItems = (dispatch) => async () => {
   }
 };
 
-const getPatientList = (dispatch) => async (text, limit) => {
-  try {
-    const usersArr = [];
-    const firestoreRef = await firebase
-      .firestore()
-      .collection("users")
-      .limit(limit);
-    const query = await firestoreRef
-      .orderBy("name")
-      .startAt(text)
-      .endAt(text + "\uf8ff");
+const getPatientItems = (dispatch) => async (day) => {
+  let data = {};
+  const uid = await firebase.auth().currentUser.uid;
+  const firestoreRef = await firebase
+    .firestore()
+    .collection("appointments")
+    .where("patient_uid", "==", uid);
 
+  const timeToString = (time) => {
+    const date = new Date(time);
+    return date.toISOString().split("T")[0];
+  };
+
+  try {
+    const getCollection = async (querySnapshot) => {
+      let count = 0;
+      data = {};
+      await querySnapshot.forEach((res) => {
+        const {
+          date,
+          topic,
+          start_time,
+          end_time,
+          patient,
+          postures,
+          uid,
+        } = res.data();
+
+        if (data[date]) {
+          for (key in data) {
+            if (key === date) {
+              data[date].push({
+                key: res.id,
+                date,
+                topic,
+                start_time,
+                end_time,
+                patient,
+                postures,
+                uid,
+              });
+            }
+          }
+        } else {
+          data[date] = [];
+          data[date].push({
+            key: res.id,
+            date,
+            topic,
+            start_time,
+            end_time,
+            patient,
+            postures,
+            uid,
+          });
+        }
+      });
+
+      setTimeout(() => {
+        try {
+          for (let i = -15; i < 85; i++) {
+            const time = day.timestamp + i * 24 * 60 * 60 * 1000;
+            if (time) {
+              const strTime = timeToString(time);
+              if (!data[strTime]) {
+                data[strTime] = [];
+              }
+            }
+          }
+
+          const newItems = {};
+          Object.keys(data).forEach((key) => {
+            newItems[key] = data[key];
+          });
+          dispatch({ type: "get_data", payload: newItems });
+        } catch (err) {
+          console.log(err);
+        }
+      }, 1000);
+    };
+
+    await firestoreRef.onSnapshot(getCollection);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+setItems = (dispatch) => (item) => {
+  dispatch({ type: "set_items", payload: item });
+};
+
+const getPatientList = (dispatch) => async (text, limit) => {
+  let usersArr = [];
+  const firestoreRef = await firebase
+    .firestore()
+    .collection("users")
+    .limit(limit);
+  const query = await firestoreRef
+    .where("role", "==", "patient")
+    .orderBy("name")
+    .startAt(text)
+    .endAt(text + "\uf8ff");
+
+  try {
     if (text) {
       dispatch({ type: "clear_patient" });
-      console.log("Text is here");
       getCollection = (querySnapshot) => {
+        usersArr = [];
         querySnapshot.forEach((res) => {
           const { name, profile_pic } = res.data();
           usersArr.push({
@@ -332,23 +488,25 @@ const getPatientList = (dispatch) => async (text, limit) => {
 };
 
 const getPatientListScreen = (dispatch) => async (text, limit) => {
-  try {
-    const firestoreRef = await firebase
-      .firestore()
-      .collection("users")
-      .limit(limit);
-    const query = await firestoreRef
-      .orderBy("name")
-      .startAt(text)
-      .endAt(text + "\uf8ff");
+  let usersArr = [];
+  const firestoreRef = await firebase
+    .firestore()
+    .collection("users")
+    .limit(limit);
+  const query = await firestoreRef
+    .where("role", "==", "patient")
+    .orderBy("name")
+    .startAt(text)
+    .endAt(text + "\uf8ff");
 
-    const usersArr = [];
+  try {
     if (text) {
       dispatch({ type: "clear_patient" });
-      console.log("Text is here");
       getCollection = (querySnapshot) => {
+        usersArr = [];
         querySnapshot.forEach((res) => {
           const { name, profile_pic } = res.data();
+
           usersArr.push({
             key: res.id,
             name,
@@ -356,8 +514,6 @@ const getPatientListScreen = (dispatch) => async (text, limit) => {
             isSelected: false,
           });
         });
-
-        console.log(usersArr.length);
 
         usersArr.length
           ? dispatch({ type: "get_patient_screen", payload: usersArr })
@@ -394,39 +550,46 @@ const clearPerson = (dispatch) => () => {
 };
 
 const getTaskList = (dispatch) => async () => {
-  const mockUid = "DO7hLhVfASUHqjo9wKZtz4Z1DNp1";
+  let taskArr = [];
+  const uid = firebase.auth().currentUser.uid;
   const docRef = firebase.firestore().collection("appointments");
-  const query = docRef.where("patient_uid", "==", mockUid);
+  const query = docRef.where("patient_uid", "==", uid);
 
-  getCollection = (querySnapshot) => {
-    querySnapshot.forEach((res) => {
-      const {
-        date,
-        end_time,
-        key,
-        patient,
-        patient_uid,
-        postures,
-        start_time,
-        topic,
-        uid,
-      } = res.data();
-      const taskArr = [];
-      taskArr.push({
-        date,
-        end_time,
-        key,
-        patient_uid,
-        postures,
-        start_time,
-        topic,
-        uid,
+  try {
+    getCollection = (querySnapshot) => {
+      taskArr = [];
+      querySnapshot.forEach((res) => {
+        const {
+          date,
+          end_time,
+          key,
+          patient,
+          patient_uid,
+          postures,
+          start_time,
+          topic,
+          uid,
+        } = res.data();
+
+        taskArr.push({
+          task_id: res.id,
+          date,
+          end_time,
+          key,
+          patient_uid,
+          postures,
+          start_time,
+          topic,
+          uid,
+        });
+
+        dispatch({ type: "get_task_list", payload: taskArr });
       });
-      console.log(taskArr);
-      dispatch({ type: "get_task_list", payload: taskArr });
-    });
-  };
-  await query.onSnapshot(getCollection);
+    };
+    await query.onSnapshot(getCollection);
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 const setCurrentPosture = (dispatch) => (posture) => {
@@ -438,15 +601,16 @@ const setEvaluateValue = (dispatch) => (postures, index) => {
   dispatch({ type: "set_index", payload: index });
 };
 
-const storeEvaluate = (dispatch) => async (postures) => {
-  const docRef = firebase
-    .firestore()
-    .collection("appointments")
-    .doc("EzV8BAXHxNo1TAlK7yOG");
+const setCurrentTaskId = (dispatch) => (id) =>
+  dispatch({ type: "set_task_id", payload: id });
+
+const storeEvaluate = (dispatch) => async (postures, id) => {
+  const docRef = firebase.firestore().collection("appointments").doc(id);
+  // where key === (appointments key)
   await docRef.update({
     postures: postures,
   });
-  navigate("Task");
+  navigate("PatientTask");
 };
 
 const clearCurrentTask = (dispatch) => () => {
@@ -455,6 +619,10 @@ const clearCurrentTask = (dispatch) => () => {
 
 const clearPatient = (dispatch) => () => {
   dispatch({ type: "clear_patient" });
+};
+
+const unsubscribe = () => () => {
+  firebase.firestore();
 };
 
 export const { Provider, Context } = createDataContext(
@@ -480,16 +648,22 @@ export const { Provider, Context } = createDataContext(
     clearCurrentTask,
     clearPatient,
     getPatientListScreen,
+    setCurrentTaskId,
+    setItems,
+    getPatientItems,
+    unsubscribe,
   },
   {
     errorMessage: "",
     patientScreen: [],
     patients: [],
+    patient: [{}],
     tasks: [],
     person: [],
     postures: [],
     selected: [],
     selectedPatient: [],
+    appointments: {},
     appointmentData: {
       topic: "",
       date: "",
@@ -501,7 +675,7 @@ export const { Provider, Context } = createDataContext(
       evaluatePostures: [],
       index: 0,
     },
-
+    currentTaskId: "",
     isLoading: true,
   }
 );

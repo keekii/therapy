@@ -14,15 +14,12 @@ import InputTextField from "../components/InputTextField";
 import { Context as AuthContext } from "../context/AuthContext";
 import { NavigationEvents } from "react-navigation";
 
-const ProfileScreen = ({ navigation }) => {
-  const { getProfile, state, clearUser, unsubscribe } = useContext(AuthContext);
+const PatientProfileScreen = ({ navigation }) => {
+  const { getProfile, state, clearUser } = useContext(AuthContext);
   const { name, dateOfBirth, phone, profile_pic, sex } = state.userProfile;
 
   useEffect(() => {
     getProfile();
-    return () => {
-      unsubscribe();
-    };
   }, []);
 
   return (
@@ -54,7 +51,7 @@ const ProfileScreen = ({ navigation }) => {
 
         <TouchableOpacity
           style={styles.submitContainer}
-          onPress={() => navigation.navigate("EditProfile")}
+          onPress={() => navigation.navigate("PatientEditProfile")}
         >
           <Text style={styles.submitText}>Edit</Text>
         </TouchableOpacity>
@@ -121,4 +118,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ProfileScreen;
+export default PatientProfileScreen;

@@ -1,34 +1,36 @@
-import React, { useContext, useState, useEffect } from "react";
-import { View, StyleSheet, Text, TextInput, Image, Button } from "react-native";
-import { FlatList, TouchableOpacity } from "react-native-gesture-handler";
-import { Context as CalendarContext } from "../context/CalendarContext";
-import { Context as AuthContext } from "../context/AuthContext";
-import Theme, { fontFamily } from "../constants/Theme";
-import { NavigationEvents } from "react-navigation";
-import firebase from "../database/firebase";
+import React, { useEffect, useContext, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
+import { FlatList } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Theme, { fontFamily } from "../constants/Theme";
 
-const PatientScreen = ({ navigation }) => {
-  const { state, clearPatient, getPatientListScreen, unsubscribe } = useContext(
-    CalendarContext
-  );
-  const { signout } = useContext(AuthContext);
-  const { patientScreen } = state;
+import { Context as ChatContext } from "../context/ChatContext";
+
+const PatientCreateChatScreen = ({ navigation }) => {
+  const {
+    getTherapistListByName,
+    state,
+    getTherapistList,
+    setSelected,
+    createPatientChatRoom,
+  } = useContext(ChatContext);
+  const { userList, selectedUser } = state;
   const [input, setInput] = useState("");
-  console.log(input);
 
   useEffect(() => {
-    getPatientListScreen("P", 10);
-    return () => {
-      unsubscribe();
-    };
+    getTherapistList();
   }, []);
 
   return (
     <SafeAreaView style={styles.container}>
-      <NavigationEvents onWillFocus={clearPatient} />
-      <Text style={styles.title}>PATIENT SEARCH</Text>
-
+      <Text style={styles.title}>THERAPIST SEARCH</Text>
       <View style={styles.inputContainer}>
         <Image
           style={[styles.icon, styles.inputIcon]}
@@ -40,31 +42,31 @@ const PatientScreen = ({ navigation }) => {
           underlineColorAndroid="transparent"
           onChangeText={setInput}
           value={input}
-          onEndEditing={() => getPatientListScreen(input, 10)}
+          onEndEditing={() => getTherapistListByName(input)}
           autoCapitalize="none"
           autoCorrect={false}
         />
       </View>
       <FlatList
-        data={patientScreen}
-        keyExtractor={(item) => item.key}
-        renderItem={({ item, index }) => {
+        data={userList}
+        keyExtractor={(item) => item.uid}
+        renderItem={({ item }) => {
           return (
-            <TouchableOpacity
-              key={item.key + ":" + index}
-              onPress={() =>
-                navigation.navigate("PatientDetail", {
-                  key: item.key,
-                  name: item.name,
-                  selected: item.isSelected,
-                  profile: item.profile_pic,
-                })
-              }
-            >
-              <View style={styles.notificationBox}>
+            <TouchableOpacity onPress={() => setSelected(item.uid)}>
+              {console.log(item.isSelected)}
+              <View
+                style={
+                  item.isSelected === false
+                    ? styles.notificationBox
+                    : styles.notificationBoxSelected
+                }
+              >
                 <Image
                   style={styles.image}
-                  source={{ uri: item.profile_pic }}
+                  source={{
+                    uri:
+                      "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
+                  }}
                 />
 
                 <Text style={styles.name}>{item.name}</Text>
@@ -73,38 +75,22 @@ const PatientScreen = ({ navigation }) => {
           );
         }}
       />
-      <TouchableOpacity
-        style={styles.submitContainer}
-        onPress={() => navigation.navigate("Signup")}
-      >
-        <Text style={styles.submitText}>Create new user</Text>
-      </TouchableOpacity>
+      {selectedUser !== undefined ? (
+        <TouchableOpacity
+          style={styles.submitContainer}
+          onPress={() => createPatientChatRoom(selectedUser)}
+        >
+          <Text style={styles.submitText}>Create</Text>
+        </TouchableOpacity>
+      ) : null}
     </SafeAreaView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 20,
+    flex: 1,
     backgroundColor: "#FFF",
     paddingHorizontal: 20,
-    flex: 1,
-  },
-  border: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#D8D8D8",
-  },
-  input: {
-    paddingVertical: 12,
-    color: "#1D2029",
-    fontSize: 14,
-    fontFamily,
-  },
-  title: {
-    color: "#1D2029",
-    fontSize: 16,
-    fontWeight: "600",
-    fontFamily,
   },
   inputContainer: {
     backgroundColor: Theme.COLORS.INPUT_BG,
@@ -131,7 +117,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginLeft: 15,
   },
-
   notificationBox: {
     paddingVertical: 10,
 
@@ -140,6 +125,16 @@ const styles = StyleSheet.create({
     height: 60,
     borderBottomWidth: 1,
     borderBottomColor: Theme.COLORS.PRIMARY,
+  },
+
+  notificationBoxSelected: {
+    paddingVertical: 10,
+
+    backgroundColor: Theme.COLORS.LIST_BG,
+    flexDirection: "row",
+    height: 60,
+    borderBottomWidth: 1,
+    borderBottomColor: "red",
   },
   image: {
     width: 40,
@@ -168,6 +163,12 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontSize: 16,
   },
+  title: {
+    color: "#1D2029",
+    fontSize: 16,
+    fontWeight: "600",
+    fontFamily,
+    marginTop: 20,
+  },
 });
-
-export default PatientScreen;
+export default PatientCreateChatScreen;

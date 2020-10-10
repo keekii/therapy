@@ -15,7 +15,6 @@ const SigninScreen = ({ navigation }) => {
         buttonText="Sign in"
         errorMessage={state.errorMessage}
         onSubmit={signin}
-        linkText="Already have account ? Click here to sign in."
         route="Signup"
       />
     </View>

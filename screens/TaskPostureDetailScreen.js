@@ -6,87 +6,92 @@ import Theme, { fontFamily } from "../constants/Theme";
 import { ScrollView } from "react-native-gesture-handler";
 
 const TaskPostureDetailScreen = ({ navigation }) => {
-  const { state } = useContext(CalendarContext);
-  const postures = state.tasks[0].postures;
-  const currentPosture = postures.find(
+  const { state, setCurrentTaskId, getPosture } = useContext(CalendarContext);
+
+  useEffect(() => {
+    getPosture();
+    const task_id = navigation.getParam("task_id");
+    setCurrentTaskId(task_id);
+  }, []);
+
+  const currentPosture = state.postures.find(
     (posture) => posture.key === navigation.getParam("id")
   );
-  const { comment, rate, key, name } = currentPosture;
 
   return (
     <ScrollView style={styles.container}>
-      <View style={{ marginTop: 10 }}>
-        <View style={{ height: 224, marginBottom: 10 }}>
-          <WebView
-            javaScriptEnabled={true}
-            domStorageEnabled={true}
-            source={{
-              uri: currentPosture.vid,
-            }}
-          />
-        </View>
-
-        <View>
-          <Text
-            style={{
-              color: "#555555",
-              fontSize: 16,
-              fontWeight: "bold",
-              fontFamily,
-              marginBottom: 12,
-            }}
-          >
-            Posture name
-          </Text>
-          <View
-            style={{
-              backgroundColor: "#F0EDED",
-
-              alignItems: "left",
-              justifyContent: "center",
-              padding: 16,
-              marginBottom: 12,
-            }}
-          >
-            <Text>{currentPosture.name}</Text>
+      {currentPosture ? (
+        <View style={{ marginTop: 10 }}>
+          <View style={{ height: 224, marginBottom: 10 }}>
+            <WebView
+              javaScriptEnabled={true}
+              domStorageEnabled={true}
+              source={{
+                uri: currentPosture.vid,
+              }}
+            />
           </View>
-          <Text
-            style={{
-              color: "#555555",
-              fontSize: 16,
-              fontWeight: "bold",
-              fontFamily,
-              marginBottom: 12,
-            }}
-          >
-            Description
-          </Text>
-          <Text
-            style={{
-              color: "#555555",
-              fontSize: 14,
-              fontFamily,
-              marginBottom: 8,
-            }}
-          >
-            {currentPosture.des}
-          </Text>
 
-          <TouchableOpacity
-            style={styles.submitContainer}
-            onPress={() =>
-              navigation.navigate("TaskEvaluate", {
-                comment,
-                key,
-                name,
-                rate,
-              })
-            }
-          >
-            <Text style={styles.submitText}>Next Step</Text>
-          </TouchableOpacity>
+          <View>
+            <Text
+              style={{
+                color: "#555555",
+                fontSize: 16,
+                fontWeight: "bold",
+                fontFamily,
+                marginBottom: 12,
+              }}
+            >
+              Posture name
+            </Text>
+            <View
+              style={{
+                backgroundColor: "#F0EDED",
+
+                alignItems: "left",
+                justifyContent: "center",
+                padding: 16,
+                marginBottom: 12,
+              }}
+            >
+              <Text>{currentPosture.name}</Text>
+            </View>
+            <Text
+              style={{
+                color: "#555555",
+                fontSize: 16,
+                fontWeight: "bold",
+                fontFamily,
+                marginBottom: 12,
+              }}
+            >
+              Description
+            </Text>
+            <Text
+              style={{
+                color: "#555555",
+                fontSize: 14,
+                fontFamily,
+                marginBottom: 8,
+              }}
+            >
+              {currentPosture.des}
+            </Text>
+
+            <TouchableOpacity
+              style={styles.submitContainer}
+              onPress={() =>
+                navigation.navigate("PatientTaskEvaluate", {
+                  name: currentPosture.name,
+                  key: currentPosture.key,
+                })
+              }
+            >
+              <Text style={styles.submitText}>Next Step</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      ) : null}
     </ScrollView>
   );
 };
