@@ -15,6 +15,7 @@ import { Context as CalendarContext } from "../context/CalendarContext";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import moment from "moment";
 import { AntDesign } from "@expo/vector-icons";
+import { Picker } from "@react-native-community/picker";
 
 const CreateAppointmentScreen = ({ navigation }) => {
   const {
