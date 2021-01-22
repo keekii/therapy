@@ -12,6 +12,7 @@ const calendarReducer = (state, action) => {
           if (item.key === action.payload) {
             item.isSelected = !item.isSelected;
           }
+          //console.log('set_selected ',{...item});
           return { ...item };
         }),
       };
@@ -42,16 +43,16 @@ const calendarReducer = (state, action) => {
     case "get_appointment_data":
       return { ...state, appointmentData: action.payload };
     case "remove_posture":
+      //console.log(state.selected.filter((item) => item.key !== action.payload));
       return {
         ...state,
-
         selected: state.selected.filter((item) => item.key !== action.payload),
       };
     case "select_patient":
       return {
         ...state,
         patients: state.patients.map((item) => {
-          state.patients.find((item) => {});
+          state.patients.find((item) => { });
           if (item.key === action.payload) {
             item.isSelected = !item.isSelected;
           } else {
@@ -59,6 +60,7 @@ const calendarReducer = (state, action) => {
               item.isSelected = false;
             }
           }
+          //console.log({...item});
           return { ...item };
         }),
       };
@@ -97,16 +99,30 @@ const calendarReducer = (state, action) => {
       return { ...state, currentTaskId: action.payload };
     case "set_items":
       return { ...state, appointments: action.payload };
+    case "update_calendar_form":
+      return { ...state, [action.payload.key]: action.payload.value };
+    case "set_therapist_list":
+      return { ...state, therapistList: action.payload };
+    case "set_selected_therapist":
+      return { ...state, therapistList: [action.payload] };
+    case "set_appointment_request_list":
+      return { ...state, appointmentRequestList: action.payload };
+    case "set_user_profile":
+      return { ...state, userProfile: action.payload };
+    case "clear_therapist_list":
+      return { ...state, therapistList: [] };
+
     default:
       return state;
+
   }
 };
 
-const getPatientDetail = (dispatch) => (key) => {
+const getPatientDetail = (dispatch) => (uid) => {
   let usersArr = [];
   const initialBoolean = true;
   const docRef = firebase.firestore().collection("appointments");
-  const query = docRef.where("patient_uid", "==", key);
+  const query = docRef.where("patient_uid", "==", uid);
 
   try {
     getCollection = (querySnapshot) => {
@@ -131,6 +147,7 @@ const getPatientDetail = (dispatch) => (key) => {
           uid,
         });
         dispatch({ type: "get_person_detail", payload: usersArr });
+        //console.log("getPatientDetail ",usersArr);
       });
     };
 
@@ -141,6 +158,7 @@ const getPatientDetail = (dispatch) => (key) => {
 };
 
 const setInitial = (dispatch) => (patient, postures) => {
+  console.log('setInitial ', patient, postures);
   dispatch({ type: "set_initial_postures", payload: postures });
   dispatch({ type: "set_initial_patient", payload: patient });
 };
@@ -151,8 +169,9 @@ const getAppointmentById = (dispatch) => async (key) => {
     const response = dbRef.get();
     let appData = (await response).data();
     appData = { ...appData, key: key };
+    //console.log('getAppointmentById ',appData)
     dispatch({ type: "get_appointment_data", payload: appData });
-  } catch (err) {}
+  } catch (err) { }
 };
 
 const storeAppointment = (dispatch) => async (
@@ -161,7 +180,7 @@ const storeAppointment = (dispatch) => async (
   start,
   end,
   patient,
-  postures
+  postures,
 ) => {
   const uid = await firebase.auth().currentUser.uid;
   const dbRef = firebase.firestore().collection("appointments");
@@ -181,10 +200,86 @@ const storeAppointment = (dispatch) => async (
       })
       .then(function (docRef) {
         const id = docRef.id;
+        //console.log('storeAppointment ', docRef)
         const dbRef = firebase.firestore().collection("appointments").doc(id);
         dbRef.update({ key: id }).then(console.log("Success add id !!!"));
       });
     navigate("Calendar");
+    console.log("Success");
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const acceptAppointmentRequest = (dispatch) => async (data) => {
+  console.log(data)
+  const { date, start_time, end_time, key, patient, patient_uid, therapist, therapist_uid, topic } = data;
+  const uid = await firebase.auth().currentUser.uid;
+  const dbRef = firebase.firestore().collection("appointments");
+
+  try {
+    dbRef
+      .add({
+        topic,
+        date,
+        start_time,
+        end_time,
+        patient,
+        patient_uid,
+        therapist_uid,
+        therapist,
+        uid
+      })
+      .then(function (docRef) {
+        const id = docRef.id;
+        //console.log('storeAppointment ', docRef)
+        const dbRef = firebase.firestore().collection("appointments").doc(id);
+        dbRef.update({ key: id }).then();
+      });
+    const dbRef2 = firebase.firestore().collection("requests").doc(key);
+    dbRef2.update({
+      status: 'accepted'
+    }).then(console.log('Accepted the request'))
+    navigate("AppointmentRequest");
+    console.log("Success");
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+
+const storeAppointmentRequest = (dispatch) => async (
+  topic,
+  date,
+  start_time,
+  end_time,
+  therapist,
+  patient
+) => {
+  const dbRef = firebase.firestore().collection("requests");
+  const therapist_uid = therapist[0].uid;
+  const { name, surname, uid, profile_pic } = patient;
+
+  try {
+    dbRef
+      .add({
+        topic,
+        date,
+        start_time,
+        end_time,
+        therapist_uid,
+        therapist: therapist[0],
+        patient_uid: uid,
+        patient: { name, surname, uid, profile_pic },
+        status: 'pending'
+      })
+      .then(function (docRef) {
+        const id = docRef.id;
+        //console.log('storeAppointment ', docRef)
+        const dbRef = firebase.firestore().collection("requests").doc(id);
+        dbRef.update({ key: id }).then(console.log("Success add id !!!"));
+      });
+    navigate("PatientCalendar");
     console.log("Success");
   } catch (err) {
     console.log(err);
@@ -223,11 +318,13 @@ const editAppointment = (dispatch) => async (
 };
 
 const setSelectedPatient = (dispatch) => (key) => {
+  //console.log('setSelectedPatient ', key);
   dispatch({ type: "select_patient", payload: key });
   dispatch({ type: "get_selectedPatient" });
 };
 
 const setSelected = (dispatch) => (key) => {
+  //console.log('setSelected key' ,key);
   dispatch({ type: "set_selected", payload: key });
   dispatch({ type: "get_selected" });
 };
@@ -240,24 +337,26 @@ const getPosture = (dispatch) => async () => {
     const getCollection = (querySnapshot) => {
       data = [];
       querySnapshot.forEach((res) => {
-        const { des, name, thumbnail, vid } = res.data();
+        const { therapy_posture_name, therapy_posture_description, therapy_posture_thumbnail_image, therapy_posture_video } = res.data();
         data.push({
-          des,
-          name,
-          thumbnail,
-          vid,
+          therapy_posture_name,
+          therapy_posture_description,
+          therapy_posture_thumbnail_image,
+          therapy_posture_video,
           key: res.id,
           isSelected: false,
         });
       });
+      //console.log('getPosture ',data)
       dispatch({ type: "get_posture", payload: data });
     };
     await firestoreRef.onSnapshot(getCollection);
     dispatch({ type: "set_loading", payload: false });
-  } catch (err) {}
+  } catch (err) { }
 };
 
 const removePosture = (dispatch) => (id) => {
+  console.log('removePosture ', id);
   dispatch({ type: "remove_posture", payload: id });
 };
 
@@ -436,6 +535,7 @@ const getPatientItems = (dispatch) => async (day) => {
 };
 
 setItems = (dispatch) => (item) => {
+  console.log('setItems ', item)
   dispatch({ type: "set_items", payload: item });
 };
 
@@ -469,9 +569,9 @@ const getPatientList = (dispatch) => async (text, limit) => {
         usersArr.length
           ? dispatch({ type: "get_patient", payload: usersArr })
           : dispatch({
-              type: "add_error",
-              payload: "Not found !!!",
-            });
+            type: "add_error",
+            payload: "Not found !!!",
+          });
       };
 
       query.onSnapshot(getCollection);
@@ -518,9 +618,9 @@ const getPatientListScreen = (dispatch) => async (text, limit) => {
         usersArr.length
           ? dispatch({ type: "get_patient_screen", payload: usersArr })
           : dispatch({
-              type: "add_error",
-              payload: "Not found !!!",
-            });
+            type: "add_error",
+            payload: "Not found !!!",
+          });
       };
 
       query.onSnapshot(getCollection);
@@ -546,6 +646,7 @@ const deleteAppointment = (dispatch) => (key) => {
 };
 
 const clearPerson = (dispatch) => () => {
+  //console.log('clearPerson')
   dispatch({ type: "clear_person" });
 };
 
@@ -593,16 +694,20 @@ const getTaskList = (dispatch) => async () => {
 };
 
 const setCurrentPosture = (dispatch) => (posture) => {
+  //console.log('setCurrentPosture ',posture)
   dispatch({ type: "set_current_posture", payload: posture });
 };
 
 const setEvaluateValue = (dispatch) => (postures, index) => {
+  //console.log('setEvaluateValue', postures, index)
   dispatch({ type: "set_evaluate_postures", payload: postures });
   dispatch({ type: "set_index", payload: index });
 };
 
-const setCurrentTaskId = (dispatch) => (id) =>
+const setCurrentTaskId = (dispatch) => (id) => {
+  //console.log('setCurrentTaskId ', id);
   dispatch({ type: "set_task_id", payload: id });
+}
 
 const storeEvaluate = (dispatch) => async (postures, id) => {
   const docRef = firebase.firestore().collection("appointments").doc(id);
@@ -625,6 +730,236 @@ const unsubscribe = () => () => {
   firebase.firestore();
 };
 
+const updateCalendarForm = (dispatch) => (key, value) => {
+  console.log('value ', key, ' value ', value);
+  dispatch({ type: "update_calendar_form", payload: { key, value } });
+}
+
+const getTherapistList = (dispatch) => (name) => {
+  const dbRef = firebase.firestore().collection("users");
+  const uid = firebase.auth().currentUser.uid;
+  const result = [];
+  let filterResult = [];
+  let filterResult2 = [];
+
+  const query = dbRef
+
+    .orderBy("name")
+    .startAt(name)
+    .endAt(name + "\uf8ff");
+
+  query
+    .get()
+    .then((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+        const { uid, name, role, profile_pic } = doc.data();
+        result.push({ uid, name, role, profile_pic });
+      });
+      filterResult = result.filter((item) => item.uid !== uid);
+      filterResult2 = filterResult.filter((item) => item.role === "therapist");
+      dispatch({ type: "set_therapist_list", payload: filterResult2 });
+    })
+    .catch((err) => console.log(err));
+};
+
+const setSelectedTherapist = (dispatch) => (item) => {
+  dispatch({ type: "set_selected_therapist", payload: item });
+};
+
+const getPatientAppointmentRequestList = (dispatch) => async () => {
+  let appointmentRequests = [];
+  const uid = firebase.auth().currentUser.uid;
+  const docRef = firebase.firestore().collection("requests");
+  const query = docRef.where("patient_uid", "==", uid);
+
+  try {
+    getCollection = (querySnapshot) => {
+      appointmentRequests = [];
+      querySnapshot.forEach((res) => {
+        const {
+          date,
+          end_time,
+          key,
+          start_time,
+          topic,
+          patient_uid,
+          patient,
+          therapist,
+          therapist_uid,
+          status
+        } = res.data();
+
+        appointmentRequests.push({
+          date,
+          end_time,
+          key,
+          start_time,
+          topic,
+          patient_uid,
+          patient,
+          therapist,
+          therapist_uid,
+          status
+        });
+
+        dispatch({ type: "set_appointment_request_list", payload: appointmentRequests });
+      });
+    };
+    await query.onSnapshot(getCollection);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const getAppointmentRequestList = (dispatch) => async () => {
+  let appointmentRequests = [];
+  const uid = firebase.auth().currentUser.uid;
+  const docRef = firebase.firestore().collection("requests");
+  const query = docRef.where("therapist_uid", "==", uid);
+
+  try {
+    getCollection = (querySnapshot) => {
+      appointmentRequests = [];
+      querySnapshot.forEach((res) => {
+        const {
+          date,
+          end_time,
+          key,
+          start_time,
+          topic,
+          patient_uid,
+          patient,
+          therapist,
+          therapist_uid,
+          status
+        } = res.data();
+
+        appointmentRequests.push({
+          date,
+          end_time,
+          key,
+          start_time,
+          topic,
+          patient_uid,
+          patient,
+          therapist,
+          therapist_uid,
+          status
+        });
+
+        console.log(appointmentRequests);
+
+        dispatch({ type: "set_appointment_request_list", payload: appointmentRequests });
+      });
+    };
+    await query.onSnapshot(getCollection);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const updateAppointmentRequest = (dispatch) => async (
+  key,
+  topic,
+  date,
+  start_time,
+  end_time,
+  therapist,
+  patient_uid,
+  patient
+) => {
+
+  const dbRef = firebase.firestore().collection("requests").doc(key);
+  try {
+    await dbRef.set({
+      key,
+      topic,
+      date,
+      start_time,
+      end_time,
+      therapist_uid: therapist[0]['uid'],
+      therapist: therapist[0],
+      patient_uid,
+      patient,
+      status: 'pending'
+    });
+    navigate("PatientAppointmentRequest");
+    console.log("Success");
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const deleteAppointmentRequestById = (dispatch) => (key) => {
+  const dbRef = firebase.firestore().collection("requests").doc(key);
+
+  dbRef.delete().then((res) => {
+    console.log("Item removed from database");
+    navigate("PatientAppointmentRequest");
+  });
+};
+
+const rejectAppointmentRequest = (dispatch) => (key) => {
+  const dbRef = firebase.firestore().collection("requests").doc(key);
+  dbRef.update({
+    status: 'rejected'
+  }).then(console.log('Rejected the request'))
+  navigate("AppointmentRequest");
+
+};
+
+const getProfileById = (dispatch) => async (id) => {
+  try {
+
+    const docRef = firebase.firestore().collection("users").doc(id);
+    docRef.get().then((doc) => {
+      const { dob, name, phone, profile_pic, gender, uid } = doc.data();
+      const userProfile = {
+        dob: '',
+        name,
+        phone,
+        profile_pic,
+        gender: '',
+        address: '',
+        education: '',
+        skill: '',
+        surname: '',
+        uid,
+        gender: '',
+      };
+      dispatch({ type: "set_user_profile", payload: userProfile });
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const getProfile = (dispatch) => async () => {
+  try {
+    const uid = firebase.auth().currentUser.uid;
+    const docRef = firebase.firestore().collection("users").doc(uid);
+    docRef.get().then((doc) => {
+      const { dob, name, phone, profile_pic, gender, uid } = doc.data();
+      const userProfile = {
+        dob: '',
+        name,
+        phone,
+        profile_pic,
+        gender: '',
+        address: '',
+        education: '',
+        skill: '',
+        surname: '',
+        uid,
+        gender: '',
+      };
+      dispatch({ type: "set_user_profile", payload: userProfile });
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 export const { Provider, Context } = createDataContext(
   calendarReducer,
   {
@@ -634,6 +969,7 @@ export const { Provider, Context } = createDataContext(
     getPosture,
     setSelected,
     setSelectedPatient,
+    setSelectedTherapist,
     storeAppointment,
     getAppointmentById,
     setInitial,
@@ -652,6 +988,17 @@ export const { Provider, Context } = createDataContext(
     setItems,
     getPatientItems,
     unsubscribe,
+    updateCalendarForm,
+    getTherapistList,
+    storeAppointmentRequest,
+    getPatientAppointmentRequestList,
+    updateAppointmentRequest,
+    deleteAppointmentRequestById,
+    rejectAppointmentRequest,
+    getAppointmentRequestList,
+    getProfileById,
+    getProfile,
+    acceptAppointmentRequest
   },
   {
     errorMessage: "",
@@ -677,5 +1024,9 @@ export const { Provider, Context } = createDataContext(
     },
     currentTaskId: "",
     isLoading: true,
+    therapistList: [],
+    selected_therapist: {},
+    appointmentRequestList: [],
+    userProfile: {}
   }
 );

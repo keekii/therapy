@@ -74,7 +74,7 @@ const PatientDetailScreen = ({ navigation }) => {
             </List.Section>
           </View>
         ) : (
-          <Text>Hi edok not found baby</Text>
+          <Text>Not found !</Text>
         )}
       </View>
     </>

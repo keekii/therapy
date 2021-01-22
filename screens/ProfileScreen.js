@@ -16,7 +16,7 @@ import { NavigationEvents } from "react-navigation";
 
 const ProfileScreen = ({ navigation }) => {
   const { getProfile, state, clearUser, unsubscribe } = useContext(AuthContext);
-  const { name, dateOfBirth, phone, profile_pic, sex } = state.userProfile;
+  const { name, surname, phone, address, dob, gender, education, skill, profile_pic,role } = state.userProfile;
 
   useEffect(() => {
     getProfile();
@@ -36,20 +36,23 @@ const ProfileScreen = ({ navigation }) => {
             uri: profile_pic,
           }}
         ></Image>
-        <Text style={styles.fullName}>{name}</Text>
+        <Text style={styles.fullName}>{name+" "+surname}</Text>
       </View>
 
       <View style={styles.bottomBox}>
         <Text style={styles.titleText}>User Details</Text>
         <ScrollView style={styles.detailBox}>
-          <InputTextField label="USER ID" data={name} edit={false} />
           <InputTextField label="MOBILE" data={phone} edit={false} />
+          <InputTextField label="ADDRESS" data={address} edit={false} />
           <InputTextField
             label="DATE OF BIRTH"
-            data={dateOfBirth}
+            data={dob}
             edit={false}
           />
-          <InputTextField label="SEX" data={sex} edit={false} />
+          <InputTextField label="GENDER" data={gender} edit={false} />
+          <InputTextField label="EDUCATION" data={education} edit={false} />
+          <InputTextField label="SKILL" data={skill} edit={false} />
+          <InputTextField label="ROLE" data={role} edit={false} />
         </ScrollView>
 
         <TouchableOpacity
@@ -79,7 +82,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 15,
   },
   topBox: {
-    flex: 3,
+    flex: 1,
     backgroundColor: "#00CAD3",
     height: 250,
     alignItems: "center",

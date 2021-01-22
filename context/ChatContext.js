@@ -115,7 +115,6 @@ const getUserListByName = (dispatch) => (name) => {
 };
 
 const getTherapistListByName = (dispatch) => (name) => {
-  console.log("Name ", name);
   const dbRef = firebase.firestore().collection("users");
   const uid = firebase.auth().currentUser.uid;
   const result = [];
@@ -162,6 +161,7 @@ const getUserList = (dispatch) => () => {
 };
 
 const setSelected = (dispatch) => (key) => {
+  console.log('setSelected ',key)
   dispatch({ type: "set_selected", payload: key });
   dispatch({ type: "get_selected_user" });
 };

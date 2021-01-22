@@ -22,12 +22,16 @@ import firebase from "../database/firebase";
 
 const EditProfileScreen = ({ navigation }) => {
   const { updateProfile, state, clearUser, signout } = useContext(AuthContext);
-  const { name, dateOfBirth, phone, profile_pic, sex } = state.userProfile;
-  const [displayName, setDisplayName] = useState(name);
-  const [mobile, setMobile] = useState(phone);
-  const [date, setDateOfBirth] = useState(dateOfBirth);
+  const { name, surname, phone, address, dob, gender, education, skill, profile_pic } = state.userProfile;
+  const [_name, setName] = useState('');
+  const [_surname, setSurname] = useState('');
+  const [_address, setAddress] = useState('');
+  const [_education, setEducation] = useState('');
+  const [_skill, setSkill] = useState('');
+  const [_phone, setMobile] = useState('');
+  const [_dob, setDateOfBirth] = useState('');
   const [_date, _setDate] = useState(new Date(1598051730000));
-  const [_sex, setSex] = useState(sex);
+  const [_gender, setGender] = useState('');
   const [image, setImage] = useState(profile_pic);
   const [realUrl, setRealUrl] = useState(profile_pic);
   const [dateTimeStatus, setDateTimeStatus] = useState(false);
@@ -37,7 +41,16 @@ const EditProfileScreen = ({ navigation }) => {
   const [switchFemaleVal, setFemaleSwitchVal] = useState(false);
 
   useEffect(() => {
-    _sex === "Male" ? setMaleSwitchVal(true) : setFemaleSwitchVal(true);
+    setName(name);
+    setSurname(surname);
+    setAddress(address);
+    setEducation(education);
+    setSkill(skill);
+    setMobile(phone);
+    setDateOfBirth(dob);
+    setGender(gender)
+
+    _gender === "Male" ? setMaleSwitchVal(true) : setFemaleSwitchVal(true);
     (async () => {
       if (Platform.OS !== "web") {
         const {
@@ -92,13 +105,13 @@ const EditProfileScreen = ({ navigation }) => {
   const toggleMaleSwitch = () => {
     setMaleSwitchVal(!switchMaleVal);
     setFemaleSwitchVal(false);
-    setSex("Male");
+    setGender("Male");
   };
 
   const toggleFemaleSwitch = () => {
     setFemaleSwitchVal(!switchFemaleVal);
     setMaleSwitchVal(false);
-    setSex("Female");
+    setGender("Female");
   };
 
   const uploadImage = async (uri, name) => {
@@ -131,20 +144,32 @@ const EditProfileScreen = ({ navigation }) => {
         <Text style={styles.titleText}>Edit Details</Text>
         <ScrollView style={styles.detailBox}>
           <InputTextField
-            label="DISPLAY NAME :"
-            data={displayName}
+            label="NAME :"
+            data={_name}
             edit={true}
-            onChange={setDisplayName}
+            onChange={setName}
+          />
+          <InputTextField
+            label="SURNAME :"
+            data={_surname}
+            edit={true}
+            onChange={setSurname}
           />
           <InputTextField
             label="MOBILE :"
-            data={mobile}
+            data={_phone}
             edit={true}
             onChange={setMobile}
           />
+           <InputTextField
+            label="ADDRESS :"
+            data={_address}
+            edit={true}
+            onChange={setAddress}
+          />
           <Text style={styles.label}> DATE : </Text>
           <View style={styles.inputContainer}>
-            <Text style={styles.input}> {date} </Text>
+            <Text style={styles.input}> {_dob} </Text>
             <TouchableOpacity onPress={showDateTimepicker}>
               <AntDesign style={{ marginRight: 5 }} name="calendar" size={20} />
             </TouchableOpacity>
@@ -180,7 +205,7 @@ const EditProfileScreen = ({ navigation }) => {
                 marginRight: 15,
               }}
             >
-              SEX :
+              GENDER :
             </Text>
             <Text
               style={{
@@ -209,14 +234,27 @@ const EditProfileScreen = ({ navigation }) => {
               value={switchFemaleVal}
               onValueChange={toggleFemaleSwitch}
             />
+            
           </View>
+          <InputTextField
+            label="EDUCATION :"
+            data={_education}
+            edit={true}
+            onChange={setEducation}
+          />
+          <InputTextField
+            label="SKILL :"
+            data={_skill}
+            edit={true}
+            onChange={setSkill}
+          />
         </ScrollView>
 
         <View style={styles._bottomBox}>
           <TouchableOpacity
             style={styles.submitContainer}
             onPress={() =>
-              updateProfile(displayName, date, mobile, realUrl, _sex)
+              updateProfile(_name,_surname,_phone,_address,_dob, _gender,_education,_skill,realUrl)
             }
           >
             <Text style={styles.submitText}>Save</Text>

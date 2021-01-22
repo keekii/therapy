@@ -65,13 +65,13 @@ const PostureScreen = ({ navigation }) => {
                   <View style={styles.cardFooter}></View>
                   <Image
                     style={styles.cardImage}
-                    source={{ uri: item.thumbnail }}
+                    source={{ uri: item.therapy_posture_thumbnail_image }}
                   />
                   <View style={styles.cardHeader}>
                     <View
                       style={{ alignItems: "center", justifyContent: "center" }}
                     >
-                      <Text style={styles.title}>{item.name}</Text>
+                      <Text style={styles.title}>{item.therapy_posture_name}</Text>
                     </View>
                   </View>
                 </TouchableOpacity>
@@ -200,8 +200,8 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 1,
   },
   cardImage: {
-    height: 70,
-    width: 70,
+    height: '60%',
+    width: '100%',
     alignSelf: "center",
   },
   title: {

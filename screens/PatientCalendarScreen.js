@@ -66,6 +66,21 @@ const PatientCalendarScreen = ({ navigation }) => {
         renderEmptyDate={renderEmptyDate}
         rowHasChanged={rowHasChanged}
       />
+      <View style={{flexDirection:'row', justifyContent:'space-around'}}>
+      <TouchableOpacity
+        style={styles.submitContainer}
+        onPress={() => navigation.navigate("CreateAppointmentRequest")}
+      >
+        <Text style={styles.submitText}>Create</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.submitContainer2}
+        onPress={() => navigation.navigate("PatientAppointmentRequest")}
+      >
+        <Text style={styles.submitText}>Requests</Text>
+      </TouchableOpacity>
+      </View>
+      
     </SafeAreaView>
   );
 };
@@ -92,7 +107,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#62D3D9",
     height: 56,
     paddingVertical: 12,
-
+width:'50%',
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  submitContainer2: {
+    backgroundColor: "#F47A8D",
+    height: 56,
+    paddingVertical: 12,
+width:'50%',
     alignItems: "center",
     justifyContent: "center",
   },

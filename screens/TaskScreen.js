@@ -26,8 +26,8 @@ const TaskScreen = ({ navigation }) => {
           <List.Section>
             <FlatList
               data={tasks}
-              keyExtractor={(item) => {
-                return item.topic;
+              keyExtractor={(item,dex) => {
+                return item.topic+'_'+dex;
               }}
               renderItem={({ item, index }) => {
                 return (
@@ -104,7 +104,7 @@ const TaskScreen = ({ navigation }) => {
           </List.Section>
         </View>
       ) : (
-        <Text>Hi edok not found baby</Text>
+        <Text>Not found !</Text>
       )}
     </SafeAreaView>
   );

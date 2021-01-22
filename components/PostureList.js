@@ -38,11 +38,11 @@ const PostureList = ({
         >
           {value.map((item) => (
             <View key={item.key} style={styles.postureContainer}>
-              <List.Item title={item.name} />
+              <List.Item title={item.therapy_posture_name} />
               <View style={styles.itemContainer}>
                 <Image
                   style={[styles.thumbnail, styles.inputIcon]}
-                  source={require("../assets/thumbnail.jpg")}
+                  source={{uri: item.therapy_posture_thumbnail_image}}
                 />
                 <TouchableOpacity onPress={() => onRemove(item.key)}>
                   {removeEnabled === true ? (

@@ -14,7 +14,7 @@ import InputTextField from "../components/InputTextField";
 import { Context as AuthContext } from "../context/AuthContext";
 import { NavigationEvents } from "react-navigation";
 
-const PatientProfile = ({ navigation }) => {
+const AdminProfileScreen = ({ navigation }) => {
   const { getProfile, state, clearUser, unsubscribe } = useContext(AuthContext);
   const { name, surname, phone, address, dob, gender, education, skill, profile_pic,role } = state.userProfile;
 
@@ -57,7 +57,7 @@ const PatientProfile = ({ navigation }) => {
 
         <TouchableOpacity
           style={styles.submitContainer}
-          onPress={() => navigation.navigate("EditProfile")}
+          onPress={() => navigation.navigate("AdminEditProfile")}
         >
           <Text style={styles.submitText}>Edit</Text>
         </TouchableOpacity>
@@ -124,4 +124,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PatientProfile;
+export default AdminProfileScreen;

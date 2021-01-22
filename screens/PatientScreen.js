@@ -75,7 +75,7 @@ const PatientScreen = ({ navigation }) => {
       />
       <TouchableOpacity
         style={styles.submitContainer}
-        onPress={() => navigation.navigate("Signup")}
+        onPress={() => navigation.navigate("UserAccount")}
       >
         <Text style={styles.submitText}>Create new user</Text>
       </TouchableOpacity>

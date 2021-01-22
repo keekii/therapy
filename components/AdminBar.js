@@ -1,45 +1,31 @@
-import React, { Component } from "react";
+Updateimport React, { Component } from "react";
 import { StyleSheet, View, Text, Image } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { AntDesign } from "@expo/vector-icons";
 
-export default class BottomBar extends Component {
+export default class AdminBar extends Component {
   constructor(props) {
     super(props);
 
     this.buttons = [
       {
-        up: "calendar",
+        up: "user",
         up_color: "#949494",
-        selected: "calendar",
+        selected: "user",
         selected_color: "#616161",
-        text: "CALENDAR",
+        text: "USER",
       },
       {
         up: "hearto",
         up_color: "#949494",
         selected: "hearto",
         selected_color: "#616161",
-        text: "Posture",
+        text: "POSTURE",
       },
       {
-        up: "team",
+        up: "profile",
         up_color: "#949494",
-        selected: "team",
-        selected_color: "#616161",
-        text: "PATIENT",
-      },
-      {
-        up: "message1",
-        up_color: "#949494",
-        selected: "message1",
-        selected_color: "#616161",
-        text: "CHAT",
-      },
-      {
-        up: "user",
-        up_color: "#949494",
-        selected: "user",
+        selected: "profile",
         selected_color: "#616161",
         text: "PROFILE",
       },

@@ -14,12 +14,12 @@ const PostureDetailScreen = ({ navigation }) => {
   return (
     <ScrollView style={styles.container}>
       <View style={{ marginTop: 10 }}>
-        <View style={{ height: 224, marginBottom: 10 }}>
+        <View style={{ height: 300, marginBottom: 10 }}>
           <WebView
             javaScriptEnabled={true}
             domStorageEnabled={true}
             source={{
-              uri: postures.vid,
+              uri: postures.therapy_posture_video,
             }}
           />
         </View>
@@ -46,7 +46,7 @@ const PostureDetailScreen = ({ navigation }) => {
               marginBottom: 12,
             }}
           >
-            <Text>{postures.name}</Text>
+            <Text>{postures.therapy_posture_name}</Text>
           </View>
           <Text
             style={{
@@ -67,7 +67,7 @@ const PostureDetailScreen = ({ navigation }) => {
               marginBottom: 8,
             }}
           >
-            {postures.des}
+            {postures.therapy_posture_description}
           </Text>
 
           <TouchableOpacity

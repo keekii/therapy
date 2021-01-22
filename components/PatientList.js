@@ -4,10 +4,10 @@ import { FlatList, TouchableOpacity } from "react-native-gesture-handler";
 import { withNavigation } from "react-navigation";
 import Theme, { fontFamily } from "../constants/Theme";
 
-const PatientList = ({ result, value, onChange, onSubmit, selected }) => {
+const PatientList = ({ header, result, value, onChange, onSubmit, selected }) => {
   return (
     <>
-      <Text style={styles.title}>Patients</Text>
+      <Text style={styles.title}>{header}</Text>
 
       <View style={styles.inputContainer}>
         <Image
@@ -27,23 +27,15 @@ const PatientList = ({ result, value, onChange, onSubmit, selected }) => {
       </View>
 
       {result.map((item) =>
-        item.isSelected === true ? (
-          <TouchableOpacity key={item.key} onPress={() => selected(item.key)}>
-            <View style={styles.notificationBox2}>
-              <Image style={styles.image} source={{ uri: item.profile_pic }} />
+        <View key={item.id}>
+              <TouchableOpacity key={item.id} onPress={() => selected(item)}>
+                <View style={styles.notificationBox}>
+                  <Image style={styles.image} source={{ uri: item.profile_pic }} />
+                  <Text style={styles.name}>{item.name}</Text>
+                </View>
+              </TouchableOpacity>
+        </View>
 
-              <Text style={styles.name}>{item.name}</Text>
-            </View>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity key={item.key} onPress={() => selected(item.key)}>
-            <View style={styles.notificationBox}>
-              <Image style={styles.image} source={{ uri: item.profile_pic }} />
-
-              <Text style={styles.name}>{item.name}</Text>
-            </View>
-          </TouchableOpacity>
-        )
       )}
     </>
   );

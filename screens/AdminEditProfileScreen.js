@@ -20,7 +20,7 @@ import { AntDesign } from "@expo/vector-icons";
 
 import firebase from "../database/firebase";
 
-const PatientEditProfile = ({ navigation }) => {
+const AdminEditProfileScreen = ({ navigation }) => {
   const { updateProfile, state, clearUser, signout } = useContext(AuthContext);
   const { name, surname, phone, address, dob, gender, education, skill, profile_pic } = state.userProfile;
   const [_name, setName] = useState('');
@@ -262,7 +262,7 @@ const PatientEditProfile = ({ navigation }) => {
 
           <TouchableOpacity
             style={styles.deleteContainer}
-            title="Delete"
+            title="Sign Out"
             onPress={signout}
           >
             <Text style={styles.deleteText}>Sign out</Text>
@@ -384,4 +384,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PatientEditProfile;
+export default AdminEditProfileScreen;
